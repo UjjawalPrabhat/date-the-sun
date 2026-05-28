@@ -12,7 +12,8 @@ import SwiftData
 struct date_the_sunApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            // Insert models
+            // Model.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
