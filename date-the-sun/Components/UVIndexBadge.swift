@@ -12,7 +12,7 @@ struct UVIndexBadge: View {
             Text("UV Index")
             Text("\(value)")
         }
-        .font(.system(size: 20, weight: .bold))
+        .font(.system(size: 20, weight: .regular))
         .foregroundStyle(Palette.ink)
         .padding(.horizontal, 22)
         .padding(.vertical, 9)

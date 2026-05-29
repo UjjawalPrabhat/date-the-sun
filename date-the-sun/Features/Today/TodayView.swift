@@ -15,8 +15,9 @@ struct TodayView: View {
                 .ignoresSafeArea()
 
             GeometryReader { geo in
-                SunCharacterView(mood: viewModel.mood)
-                    .scaledToFit()
+                InteractiveKiranView(mood: viewModel.mood) {
+                    viewModel.reactToTap()
+                }
                     .frame(width: geo.size.width * 0.82)
                     .frame(maxWidth: .infinity, alignment: .top)
                     .offset(y: geo.size.height * 0.15)
@@ -38,7 +39,10 @@ struct TodayView: View {
                 SpeechBubble(text: viewModel.message)
                     .frame(width: min(196, geo.size.width * 0.5))
                     .position(x: geo.size.width * 0.30, y: geo.size.height * 0.47)
+                    .id(viewModel.message)
+                    .transition(.scale(scale: 0.85).combined(with: .opacity))
             }
+            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: viewModel.message)
 
             VStack(spacing: 14) {
                 Text("\(viewModel.greeting), \(viewModel.userName)")
