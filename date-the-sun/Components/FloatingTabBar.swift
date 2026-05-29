@@ -1,25 +1,27 @@
-//
-//  FloatingTabBar.swift
-//  date-the-sun
-//
-//  The custom dark pill tab bar shown floating at the bottom of the screen.
-//
-
 import SwiftUI
 
-enum AppTab: Hashable {
+enum AppTab: Hashable, CaseIterable {
     case today
     case summary
+
+    var systemImage: String {
+        switch self {
+        case .today:   "sun.max.fill"
+        case .summary: "newspaper.fill"
+        }
+    }
 }
 
+/// The custom dark pill tab bar floating at the bottom of the screen.
 struct FloatingTabBar: View {
     @Binding var selection: AppTab
     var namespace: Namespace.ID
 
     var body: some View {
         HStack(spacing: 4) {
-            item(.today, system: "sun.max.fill")
-            item(.summary, system: "newspaper.fill")
+            ForEach(AppTab.allCases, id: \.self) { tab in
+                item(tab)
+            }
         }
         .padding(6)
         .background(
@@ -29,14 +31,14 @@ struct FloatingTabBar: View {
         )
     }
 
-    private func item(_ tab: AppTab, system: String) -> some View {
+    private func item(_ tab: AppTab) -> some View {
         let isSelected = selection == tab
         return Button {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                 selection = tab
             }
         } label: {
-            Image(systemName: system)
+            Image(systemName: tab.systemImage)
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(isSelected ? Palette.ink : Palette.barIcon)
                 .frame(width: isSelected ? 78 : 56, height: 44)
