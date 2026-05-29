@@ -29,4 +29,11 @@ final class TodayViewModel: ObservableObject {
         mood = summary.mood
         message = summary.message
     }
+
+    func reactToTap() {
+        let moods = KiranMood.allCases
+        let next = moods.firstIndex(of: mood).map { ($0 + 1) % moods.count } ?? 0
+        mood = moods[next]
+        message = mood.line
+    }
 }
