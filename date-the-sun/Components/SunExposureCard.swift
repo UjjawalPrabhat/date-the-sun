@@ -1,34 +1,29 @@
 import SwiftUI
 
-/// Card summarizing the day's sun exposure: a 24-hour clock plus a legend.
+/// The green Sun Exposure card: a 24-hour indoor/outdoor clock plus a legend.
 struct SunExposureCard: View {
     var intervals: [SunExposureInterval]
 
     var body: some View {
-        VStack {
-            HStack {
-                Image(systemName: "sun.max.fill")
-                Text("Sun Exposure")
-                Spacer()
-                Image(systemName: "info.circle.fill")
-            }
-            .padding()
-            .foregroundStyle(.white)
-            .background(.black)
+        SectionCard(title: "Sun Exposure", systemImage: "sun.max.fill", background: .shrek) {
+            VStack(spacing: 16) {
+                IndoorOutdoorClock(intervals: intervals)
+                    .padding(.top, 20)
 
-            IndoorOutdoorClock(intervals: intervals)
-
-            HStack {
-                legendItem(color: .indoor, label: "Indoor Time")
-                legendItem(color: .outdoor, label: "Outdoor Time")
-                legendItem(color: .vermillion, label: "Peak UV Index")
+                HStack(spacing: 16) {
+                    legendItem(color: .outdoor, label: "Outdoor Time")
+                    legendItem(color: .indoor, label: "Indoor Time")
+                    legendItem(color: .vermillion, label: "UV Index Peak")
+                }
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Palette.ink)
             }
+            .padding(16)
         }
-        .background(.shrek)
     }
 
     private func legendItem(color: Color, label: String) -> some View {
-        HStack {
+        HStack(spacing: 6) {
             Circle()
                 .foregroundStyle(color)
                 .frame(width: 10, height: 10)
@@ -39,4 +34,6 @@ struct SunExposureCard: View {
 
 #Preview {
     SunExposureCard(intervals: SunExposureInterval.sampleDay)
+        .padding()
+        .background(Palette.canvas)
 }
