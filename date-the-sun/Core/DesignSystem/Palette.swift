@@ -35,4 +35,10 @@ enum Palette {
 
     // UV accent
     static let uvIcon     = Color(hex: 0xF26A1B)
+
+    // Summary dashboard
+    static let canvas     = Color(hex: 0xF6F2E3)   // cream screen background
+    static let heroSky    = Color(hex: 0x6FA8DC)   // blue hero card
+    static let cardHeader  = Color(hex: 0x14151A)  // black card header
+    static let rowSubtitle = Color(hex: 0x8A8F9C)  // muted row subtitle
 }
