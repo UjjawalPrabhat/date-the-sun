@@ -15,8 +15,8 @@ struct IndoorOutdoorClock: View {
     private let labelRadius: CGFloat = 41
     private let tickRadius: CGFloat = 66
 
-    // Midday peak-UV window, drawn as a separate arc across the top of the dial.
-    private let uvWindow = (start: 1380.0, end: 1560.0)
+    // Midday peak-UV window (≈11am–1pm), drawn as a separate arc near the bottom of the dial.
+    private let uvWindow = (start: 660.0, end: 780.0)
 
     var body: some View {
         ZStack {
