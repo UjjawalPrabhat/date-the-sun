@@ -15,7 +15,7 @@ struct SectionCard<Content: View>: View {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
                 Text(title)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(AppFont.semibold(17))
                 Spacer()
                 Image(systemName: "questionmark.circle.fill")
                     .foregroundStyle(.white.opacity(0.85))

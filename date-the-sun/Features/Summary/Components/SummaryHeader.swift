@@ -8,7 +8,7 @@ struct SummaryHeader: View {
     var body: some View {
         HStack {
             Text(dateText)
-                .font(.system(size: 30, weight: .heavy))
+                .font(AppFont.medium(30))
                 .foregroundStyle(Palette.ink)
 
             Spacer()

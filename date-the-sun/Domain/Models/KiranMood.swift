@@ -28,6 +28,16 @@ nonisolated enum KiranMood: String, CaseIterable {
         }
     }
 
+    /// The bold hero headline shown on the Summary screen for this mood.
+    var headline: String {
+        switch self {
+        case .happy:   "What a happy day — especially with you"
+        case .calm:    "A calm, balanced day — thanks for knowing me"
+        case .neutral: "Don't get so busy you forget about me"
+        case .toxic:   "Easy — I think I need a little space today"
+        }
+    }
+
     /// A representative line of dialogue from the character brief.
     var line: String {
         switch self {

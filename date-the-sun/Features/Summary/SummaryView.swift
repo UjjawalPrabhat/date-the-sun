@@ -1,14 +1,10 @@
 import SwiftUI
 
-/// The Summary dashboard: a date header, a Daily/Weekly toggle, and the
-/// matching daily or weekly content over a cream background.
+/// The Summary dashboard: a date header, a Daily/Weekly toggle, and the matching
+/// content over a cream background.
 struct SummaryView: View {
-    @StateObject private var viewModel: SummaryViewModel
+    @Bindable var model: SunModel
     @Namespace private var periodNamespace
-
-    init(viewModel: SummaryViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
-    }
 
     var body: some View {
         ZStack {
@@ -16,11 +12,10 @@ struct SummaryView: View {
 
             ScrollView {
                 VStack(spacing: 20) {
-                    SummaryHeader(dateText: headerText)
+                    SummaryHeader(dateText: model.selectedPeriod == .daily ? model.dateText : model.weekLabel)
+                    PeriodToggle(selection: $model.selectedPeriod, namespace: periodNamespace)
 
-                    PeriodToggle(selection: $viewModel.selectedPeriod, namespace: periodNamespace)
-
-                    switch viewModel.selectedPeriod {
+                    switch model.selectedPeriod {
                     case .daily:  dailyContent
                     case .weekly: weeklyContent
                     }
@@ -32,30 +27,25 @@ struct SummaryView: View {
         }
     }
 
-    private var headerText: String {
-        switch viewModel.selectedPeriod {
-        case .daily:  viewModel.dateText
-        case .weekly: viewModel.weekLabel
-        }
-    }
-
     @ViewBuilder
     private var dailyContent: some View {
-        HeroCharacterCard(headline: viewModel.headline, mood: viewModel.mood)
-        SunExposureCard(intervals: viewModel.intervals)
-        ProtectionLogCard(items: viewModel.protectionItems) { item in
-            viewModel.toggleProtection(item)
-        }
+        HeroCharacterCard(headline: model.headline, mood: model.mood)
+        SunExposureCard(intervals: model.intervals)
+        ProtectionLogCard(items: model.protection) { model.toggleProtection($0) }
     }
 
     @ViewBuilder
     private var weeklyContent: some View {
-        HeroCharacterCard(headline: viewModel.weeklyHeadline, mood: viewModel.weeklyMood)
-        WeeklyExposureChart(days: viewModel.weekDays)
-        ProtectionWeekGrid(rows: viewModel.protectionWeek)
+        HeroCharacterCard(headline: model.weekly.headline, mood: model.weekly.mood)
+        WeeklyExposureChart(days: model.weekly.days)
+        ProtectionWeekGrid(rows: model.weekly.protection)
     }
 }
 
 #Preview {
-    SummaryView(viewModel: SummaryViewModel())
+    SummaryView(model: SunModel(
+        uvProvider: StaticUVIndexProvider(),
+        locationProvider: StaticLocationProvider(),
+        daylightProvider: MockDaylightProvider()
+    ))
 }

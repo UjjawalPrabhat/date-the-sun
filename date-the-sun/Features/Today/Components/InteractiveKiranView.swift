@@ -14,7 +14,8 @@ struct InteractiveKiranView: View {
     @State private var dragTilt: Double = 0
 
     var body: some View {
-        SunCharacterView(mood: mood)
+        Image(mood.assetName)
+            .resizable()
             .id(mood)
             .transition(.opacity.combined(with: .scale(scale: 0.96)))
             .scaledToFit()
@@ -43,11 +44,10 @@ struct InteractiveKiranView: View {
     }
 
     private func tap() {
-        // Squash-and-stretch bounce.
+        // Squash-and-stretch bounce, then notify.
         withAnimation(.spring(response: 0.16, dampingFraction: 0.45)) { pressScale = 1.10 }
         withAnimation(.spring(response: 0.42, dampingFraction: 0.55).delay(0.12)) { pressScale = 1.0 }
-        // Mood/dialogue change, crossfaded via the .id transition above.
-        withAnimation(.easeInOut(duration: 0.3)) { onTap() }
+        onTap()
     }
 
     private func startIdleAnimation() {

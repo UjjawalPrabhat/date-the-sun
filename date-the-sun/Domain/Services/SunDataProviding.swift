@@ -1,7 +1,7 @@
 import Foundation
 
-/// Supplies the day's and week's sun summaries. The seam where a real UV /
-/// location / HealthKit data source plugs in later.
+/// Supplies the day's and week's sun summaries — the seam where real data
+/// sources plug in.
 nonisolated protocol SunDataProviding {
     func todaySummary() -> DailySunSummary
     func weeklySummary() -> WeeklySunSummary
@@ -12,9 +12,6 @@ nonisolated struct MockSunDataProvider: SunDataProviding {
         DailySunSummary(
             userName: "UJ",
             uvIndex: 4,
-            mood: .happy,
-            message: "Sun's out, it's gentle today. Perfect weather for a light stroll.",
-            headline: "What a happy day — especially with you",
             intervals: SunExposureInterval.sampleDay,
             protectionItems: [
                 .init(title: "Sunscreen",

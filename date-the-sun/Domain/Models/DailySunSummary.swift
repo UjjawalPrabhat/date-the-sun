@@ -1,12 +1,9 @@
 import Foundation
 
-/// The day's sun data shared by the Today and Summary screens.
+/// The day's raw sun data. Mood is derived from these by `RelationshipScore`.
 nonisolated struct DailySunSummary {
     let userName: String
     let uvIndex: Int
-    let mood: KiranMood
-    let message: String          // contextual line shown on the Today screen
-    let headline: String         // bold hero line shown on the Summary screen
     let intervals: [SunExposureInterval]
     let protectionItems: [ProtectionItem]
 }
