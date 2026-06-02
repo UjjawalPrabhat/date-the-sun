@@ -1,13 +1,9 @@
 import SwiftUI
 
-/// The Today screen: greeting, UV index, the full-body Sun mascot and a
+/// The Today screen: greeting, UV index, and the full-body Sun mascot with a
 /// contextual speech bubble over a soft blue-glow background.
 struct TodayView: View {
-    @StateObject private var viewModel: TodayViewModel
-
-    init(viewModel: TodayViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
-    }
+    let model: SunModel
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -15,9 +11,7 @@ struct TodayView: View {
                 .ignoresSafeArea()
 
             GeometryReader { geo in
-                InteractiveKiranView(mood: viewModel.mood) {
-                    viewModel.reactToTap()
-                }
+                InteractiveKiranView(mood: model.mood)
                     .frame(width: geo.size.width * 0.82)
                     .frame(maxWidth: .infinity, alignment: .top)
                     .offset(y: geo.size.height * 0.15)
@@ -36,23 +30,23 @@ struct TodayView: View {
             .ignoresSafeArea()
 
             GeometryReader { geo in
-                SpeechBubble(text: viewModel.message)
+                SpeechBubble(text: model.message)
                     .frame(width: min(196, geo.size.width * 0.5))
                     .position(x: geo.size.width * 0.30, y: geo.size.height * 0.47)
-                    .id(viewModel.message)
+                    .id(model.message)
                     .transition(.scale(scale: 0.85).combined(with: .opacity))
             }
-            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: viewModel.message)
+            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: model.message)
 
             VStack(spacing: 14) {
-                Text("\(viewModel.greeting), \(viewModel.userName)")
+                Text("\(model.greeting), \(model.userName)")
                     .font(.system(size: 30, weight: .heavy))
                     .foregroundStyle(Palette.ink)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.7)
                     .lineLimit(2)
 
-                UVIndexBadge(value: viewModel.uvIndex)
+                UVIndexBadge(value: model.uvIndex)
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
@@ -62,5 +56,9 @@ struct TodayView: View {
 }
 
 #Preview {
-    TodayView(viewModel: TodayViewModel())
+    TodayView(model: SunModel(
+        uvProvider: StaticUVIndexProvider(),
+        locationProvider: StaticLocationProvider(),
+        daylightProvider: MockDaylightProvider()
+    ))
 }

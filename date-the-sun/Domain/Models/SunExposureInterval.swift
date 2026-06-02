@@ -10,12 +10,13 @@ nonisolated struct SunExposureInterval: Identifiable {
 }
 
 nonisolated extension SunExposureInterval {
-    /// A representative day used by previews and the mock data source.
+    /// A representative, balanced day used by previews and the mock data source:
+    /// mostly indoors with a morning and a midday spell outside (~2h outdoors).
     static let sampleDay: [SunExposureInterval] = [
-        .init(isOutdoor: false, startMinute: 1 * 60,        endMinute: 4 * 60),
-        .init(isOutdoor: true,  startMinute: 4 * 60,        endMinute: 4 * 60 + 30),
-        .init(isOutdoor: false, startMinute: 4 * 60 + 30,   endMinute: 6 * 60 + 30),
-        .init(isOutdoor: true,  startMinute: 6 * 60 + 30,   endMinute: 9 * 60 + 30),
-        .init(isOutdoor: false, startMinute: 9 * 60 + 30,   endMinute: 11 * 60),
+        .init(isOutdoor: false, startMinute: 0,    endMinute: 390),   // overnight
+        .init(isOutdoor: true,  startMinute: 420,  endMinute: 480),   // morning walk
+        .init(isOutdoor: false, startMinute: 510,  endMinute: 750),   // indoors
+        .init(isOutdoor: true,  startMinute: 780,  endMinute: 840),   // midday outside
+        .init(isOutdoor: false, startMinute: 870,  endMinute: 1440),  // evening / night
     ]
 }

@@ -27,7 +27,7 @@ struct PeriodToggle: View {
             }
         } label: {
             Text(period.title)
-                .font(.system(size: 15, weight: .semibold))
+                .font(AppFont.medium(15))
                 .foregroundStyle(isSelected ? .white : Palette.ink)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
