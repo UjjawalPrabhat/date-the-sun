@@ -23,7 +23,7 @@ struct ProtectionWeekGrid: View {
                 Image(systemName: row.systemImage)
                     .font(.system(size: 18, weight: .semibold))
                 Text(row.title)
-                    .font(.system(size: 16, weight: .bold))
+                    .font(AppFont.semibold(16))
             }
             .foregroundStyle(Palette.ink)
 
@@ -34,7 +34,7 @@ struct ProtectionWeekGrid: View {
                             .font(.system(size: 20))
                             .foregroundStyle(done ? Palette.ink : Palette.ink.opacity(0.3))
                         Text(weekdayLabels[index % weekdayLabels.count])
-                            .font(.system(size: 11, weight: .bold))
+                            .font(AppFont.semibold(11))
                             .foregroundStyle(Palette.rowSubtitle)
                     }
                     .frame(maxWidth: .infinity)
