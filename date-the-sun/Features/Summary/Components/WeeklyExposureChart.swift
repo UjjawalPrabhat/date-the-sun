@@ -24,7 +24,7 @@ struct WeeklyExposureChart: View {
                     legendItem(color: .outdoor, label: "Outdoor Time")
                     legendItem(color: .indoor, label: "Indoor Time")
                 }
-                .font(.system(size: 12, weight: .medium))
+                .font(AppFont.medium(12))
                 .foregroundStyle(Palette.ink)
             }
             .padding(16)
@@ -48,7 +48,7 @@ struct WeeklyExposureChart: View {
                         .frame(height: max(indoorH, 2))
                 }
                 Text(day.weekdayLabel)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(AppFont.semibold(11))
                     .foregroundStyle(Palette.ink)
                     .padding(.top, 6)
             }

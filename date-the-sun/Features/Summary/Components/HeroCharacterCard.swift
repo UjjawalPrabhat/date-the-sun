@@ -2,14 +2,15 @@ import SwiftUI
 
 /// The blue hero card: a bold headline with Kiran standing in the card, her
 /// sun-head breaking above the top edge for a "stepping out of the screen" feel
-/// while her legs crop to the rounded bottom. A clear layout box keeps the card
-/// exactly `cardHeight` tall so the head overflows upward only.
+/// while her legs crop to the rounded bottom. The headline sits centered in the
+/// left column so it fills the card's height and balances the figure.
 struct HeroCharacterCard: View {
     let headline: String
     var mood: KiranMood = .happy
 
     private let cardHeight: CGFloat = 360
     private let topOverflow: CGFloat = 48
+    private let cornerRadius: CGFloat = 26
     private let figureAspect: CGFloat = 1253.0 / 3264.0
 
     var body: some View {
@@ -17,19 +18,21 @@ struct HeroCharacterCard: View {
             .frame(height: cardHeight)
             .overlay(alignment: .bottom) {
                 ZStack(alignment: .bottom) {
-                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(Palette.heroSky)
                         .frame(height: cardHeight)
+                        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
 
                     Text(headline)
-                        .font(AppFont.medium(34))
+                        .font(AppFont.medium(38))
                         .foregroundStyle(Palette.ink)
-                        .lineLimit(5)
+                        .lineLimit(6)
                         .minimumScaleFactor(0.6)
-                        .frame(width: 190, alignment: .leading)
+                        .lineSpacing(2)
+                        .frame(width: 200, alignment: .leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: cardHeight, alignment: .top)
-                        .padding(.top, 24)
+                        .padding(.top, 28)
                         .padding(.leading, 24)
 
                     GeometryReader { geo in
@@ -45,7 +48,7 @@ struct HeroCharacterCard: View {
                     }
                     .frame(height: cardHeight + topOverflow)
                     .clipShape(
-                        UnevenRoundedRectangle(bottomLeadingRadius: 26, bottomTrailingRadius: 26, style: .continuous)
+                        UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
                     )
                 }
                 .frame(height: cardHeight + topOverflow)

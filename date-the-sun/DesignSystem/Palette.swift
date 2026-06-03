@@ -12,6 +12,11 @@ enum Palette {
     static let shirt       = Color(hex: 0xFBFAF4)   // speech bubble / tab highlight
     static let fieldBottom = Color(hex: 0xA1C57E)
 
+    // Today sky glow
+    static let skyTop      = Color(hex: 0xE8F3FB)   // soft blue at the top
+    static let glowCore    = Color(hex: 0xBBDDF2)   // bright center of the halo
+    static let glowEdge    = Color(hex: 0xD6EAF7)   // fading halo edge
+
     // Tab bar
     static let barBG       = Color(hex: 0x14151A)
     static let barIcon     = Color(hex: 0xCFCFD4)

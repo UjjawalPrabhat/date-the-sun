@@ -1,18 +1,19 @@
 import SwiftUI
 
-/// White canvas with a soft blue glow behind the character (the Today screen).
+/// The Today screen background: a soft blue glow up top fading into the app's
+/// cream canvas, with a brighter halo behind the character.
 struct SkyGlowBackground: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(hex: 0xE8F3FB), .white],
+                colors: [Palette.skyTop, Palette.canvas],
                 startPoint: .top,
                 endPoint: .bottom
             )
             RadialGradient(
                 colors: [
-                    Color(hex: 0xBBDDF2).opacity(0.85),
-                    Color(hex: 0xD6EAF7).opacity(0.35),
+                    Palette.glowCore.opacity(0.85),
+                    Palette.glowEdge.opacity(0.35),
                     .clear,
                 ],
                 center: UnitPoint(x: 0.5, y: 0.42),
