@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// The soft blue halo over a white base. Reusable so the Today background and the
-/// Summary hero card share the exact same glow, tying the two screens together.
-struct SkyGlow: View {
+/// The Today screen background: a soft blue glow up top fading into the app's
+/// cream canvas, with a brighter halo behind the character.
+struct SkyGlowBackground: View {
     var body: some View {
         ZStack {
             LinearGradient(
@@ -21,12 +21,5 @@ struct SkyGlow: View {
                 endRadius: 330
             )
         }
-    }
-}
-
-/// Full-screen sky glow used as the Today screen's background.
-struct SkyGlowBackground: View {
-    var body: some View {
-        SkyGlow()
     }
 }

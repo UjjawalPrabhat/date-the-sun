@@ -88,7 +88,7 @@ struct DialogueBox: View {
 
 #Preview {
     ZStack(alignment: .bottom) {
-        SkyGlow().ignoresSafeArea()
+        SkyGlowBackground().ignoresSafeArea()
         DialogueBox(speaker: "Kiran", text: "You're so understanding and attentive of me, I can't love you enough.")
             .padding(.horizontal, 18)
             .padding(.bottom, 80)
