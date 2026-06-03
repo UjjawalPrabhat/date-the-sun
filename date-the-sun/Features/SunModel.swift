@@ -2,7 +2,7 @@ import SwiftUI
 import Observation
 
 /// Single source of truth for the day, shared by the Today and Summary screens.
-/// Seeds from mock data, then refreshes from live UV (WeatherKit) and daylight
+/// Seeds from mock data, then refreshes from live UV (WeatherKit REST) and daylight
 /// (HealthKit); Kiran's mood is always derived from the relationship score.
 @MainActor
 @Observable
@@ -31,7 +31,7 @@ final class SunModel {
     init(
         greetingProvider: GreetingProviding = GreetingProvider(),
         sunData: SunDataProviding = MockSunDataProvider(),
-        uvProvider: UVIndexProviding = WeatherKitUVIndexProvider(),
+        uvProvider: UVIndexProviding = RESTUVIndexProvider(),
         locationProvider: LocationProviding = DeviceLocationProvider(),
         daylightProvider: DaylightExposureProviding = HealthKitDaylightProvider(),
         now: Date = .now
