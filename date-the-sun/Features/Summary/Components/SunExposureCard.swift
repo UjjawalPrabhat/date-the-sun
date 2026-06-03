@@ -15,7 +15,7 @@ struct SunExposureCard: View {
                     legendItem(color: .indoor, label: "Indoor Time")
                     legendItem(color: .vermillion, label: "UV Index Peak")
                 }
-                .font(.system(size: 12, weight: .medium))
+                .font(AppFont.medium(12))
                 .foregroundStyle(Palette.ink)
             }
             .padding(16)

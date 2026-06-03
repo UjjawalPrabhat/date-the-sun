@@ -31,10 +31,10 @@ private struct ProtectionRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title)
-                    .font(.system(size: 16, weight: .bold))
+                    .font(AppFont.semibold(16))
                     .foregroundStyle(Palette.ink)
                 Text(item.subtitle)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(AppFont.medium(13))
                     .foregroundStyle(Palette.rowSubtitle)
             }
 
