@@ -252,6 +252,7 @@
 				CODE_SIGN_ENTITLEMENTS = "date-the-sun/date-the-sun.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 33PGK742CZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Your Time in Daylight is used to estimate how long you spent outdoors in the sun.";
@@ -292,6 +293,7 @@
 				CODE_SIGN_ENTITLEMENTS = "date-the-sun/date-the-sun.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 33PGK742CZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Your Time in Daylight is used to estimate how long you spent outdoors in the sun.";
