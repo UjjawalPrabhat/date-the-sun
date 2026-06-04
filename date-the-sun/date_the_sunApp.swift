@@ -29,7 +29,7 @@ struct date_the_sunApp: App {
         WindowGroup {
             RootView()
                 .onAppear {
-                    locationTracker = LocationTracker(modelContext: sharedModelContainer.mainContext)
+                    locationTracker = LocationTracker(modelContainer: sharedModelContainer)
                     locationTracker?.start()
                 }
         }
