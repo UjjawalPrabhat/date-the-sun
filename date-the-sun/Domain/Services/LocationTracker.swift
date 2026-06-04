@@ -17,8 +17,8 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         self.processor = LocationProcessor(modelContainer: modelContainer)
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        manager.distanceFilter = 10
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.distanceFilter = 5
     }
     
     func start() {
@@ -47,7 +47,9 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
 @ModelActor
 actor LocationProcessor {
     private var debounceTask: Task<Void, Never>?
-    private let debounceInterval: Duration = .seconds(5 * 60)
+//    private let debounceInterval: Duration = .seconds(5 * 60)
+    private let debounceInterval: Duration = .seconds(5)
+    
     
     func handleLocationUpdate(_ location: CLLocation) {
         let entry = LocationEntry(
@@ -67,14 +69,25 @@ actor LocationProcessor {
             do {
                 try await Task.sleep(for: debounceInterval)
                 /// When debounce interval reached, do image classification for location
-                locationClassification(for: location)
-            } catch {
+                try await locationClassification(for: entry)
+            } catch is CancellationError {
                 /// cancelled, new update
+            } catch {
+                print("Classification error: \(error)")
             }
         }
     }
     
-    private func locationClassification(for location: CLLocation) {
-        
+    private func locationClassification(for entry: LocationEntry) async throws {
+        // Run classfication
+        if let res = try await MapTileClassification.classify(lat: entry.latitude, lng: entry.longitude, isAppleMaps: true) {
+            let record = IndoorOutdoorEntry(identifier: res.identifier, confidence: Double(res.confidence), provider: "A", timestamp: Date.now)
+            modelContext.insert(record)
+        }
+        if let res = try await MapTileClassification.classify(lat: entry.latitude, lng: entry.longitude, isAppleMaps: false) {
+            let record = IndoorOutdoorEntry(identifier: res.identifier, confidence: Double(res.confidence), provider: "G", timestamp: Date.now)
+            modelContext.insert(record)
+        }
+        try? modelContext.save()
     }
 }
