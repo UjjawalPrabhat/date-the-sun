@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import SwiftData
+import OSLog
 
 class SolarTime {
     static func getSolarTimeToday(latitude: Double, longitude: Double) async throws -> SolarTimeResponse {
@@ -37,7 +38,7 @@ class SolarTime {
         guard let day = decoded.forecastDaily.days.first else {
             throw URLError(.cannotParseResponse)
         }
-        print("Getting Solar Time - Sunrise:\(day.sunrise)  Sunset:\(day.sunset)")
+        Logger.app.debug("Getting Solar Time - Sunrise:\(day.sunrise)  Sunset:\(day.sunset)")
         return SolarTimeResponse(sunrise: day.sunrise, sunset: day.sunset)
     }
 }
@@ -71,7 +72,7 @@ actor SolarTimeService {
         )
         let existing = try modelContext.fetch(descriptor)
         guard existing.isEmpty else {
-            print("Solar Time already stored for today")
+            Logger.app.debug("Solar Time already stored for today")
             return
         }
         let data = try await SolarTime.getSolarTimeToday(latitude: latitude, longitude: longitude)

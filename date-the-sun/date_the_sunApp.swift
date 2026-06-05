@@ -2,6 +2,7 @@ import BackgroundTasks
 import SwiftUI
 import SwiftData
 import CoreLocation
+import OSLog
 
 @main
 struct date_the_sunApp: App {
@@ -69,13 +70,13 @@ struct date_the_sunApp: App {
         let descriptor = FetchDescriptor<HMMObservation>()
         let existing = (try? context.fetch(descriptor)) ?? []
         guard existing.isEmpty else {
-            print("Test data already loaded, skipping")
+            Logger.app.debug("Test data already loaded, skipping")
             return
         }
         
         guard let url = Bundle.main.url(forResource: "hmm_test_data", withExtension: "json"),
               let data = try? Data(contentsOf: url) else {
-            print("hmm_test_data.json not found in bundle")
+            Logger.app.error("hmm_test_data.json not found in bundle")
             return
         }
         
@@ -83,7 +84,7 @@ struct date_the_sunApp: App {
         decoder.dateDecodingStrategy = .iso8601
         
         guard let dtos = try? decoder.decode([HMMObservationDTO].self, from: data) else {
-            print("Failed to decode hmm_test_data.json")
+            Logger.app.error("Failed to decode hmm_test_data.json")
             return
         }
         
@@ -93,7 +94,7 @@ struct date_the_sunApp: App {
         }
         
         try? context.save()
-        print("Loaded \(dtos.count) test observations")
+        Logger.app.info("Loaded \(dtos.count) test observations")
     }
 #endif
 }
@@ -159,9 +160,9 @@ nonisolated func scheduleSunsetSunrise() {
     request.earliestBeginDate = tomorrow
     do {
         try BGTaskScheduler.shared.submit(request)
-        print("Sunset sunrise scheduled for tomorrow")
+        Logger.app.info("Sunset sunrise scheduled for tomorrow")
     } catch {
-        print("Failed to schedule Sunset Sunrise: \(error)")
+        Logger.app.error("Failed to schedule Sunset Sunrise: \(error)")
     }
 }
 
@@ -174,8 +175,8 @@ nonisolated func scheduleHMMViterbi() {
     )
     do {
         try BGTaskScheduler.shared.submit(request)
-        print("HMM Viterbi scheduled")
+        Logger.app.info("HMM Viterbi scheduled")
     } catch {
-        print("Failed to schedule HMM Viterbi: \(error)")
+        Logger.app.error("Failed to schedule HMM Viterbi: \(error)")
     }
 }

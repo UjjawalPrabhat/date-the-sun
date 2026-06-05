@@ -7,12 +7,13 @@
 
 import BackgroundTasks
 import SwiftData
+import OSLog
 
 /// Props to Sonnet
 struct HMMBackgroundRunner {
     
     static func schedule() {
-        print("Scheduling HMM Viterbi task")
+        Logger.app.debug("Scheduling HMM Viterbi task")
         let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.hmm-viterbi")
         request.earliestBeginDate = Calendar.current.nextDate(
             after: .now,
@@ -35,7 +36,7 @@ struct HMMBackgroundRunner {
               !observations.isEmpty else { return }
         
         // Run Viterbi
-        print("Running Viterbi...")
+        Logger.app.info("Running Viterbi...")
         let results = HMMEngine.viterbi(observations: observations)
         
         // Write inferred states back
@@ -47,7 +48,7 @@ struct HMMBackgroundRunner {
         do {
             try context.save()
         } catch {
-            print("HMM background save error: \(error)")
+            Logger.app.error("HMM background save error: \(error)")
         }
         
         // Reschedule for next night

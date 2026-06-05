@@ -7,6 +7,7 @@
 
 import CoreLocation
 import SwiftData
+import OSLog
 
 @Observable
 class LocationTracker: NSObject, CLLocationManagerDelegate {
@@ -66,7 +67,7 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location error: \(error.localizedDescription)")
+        Logger.app.error("Location error: \(error.localizedDescription)")
     }
 }
 
@@ -108,7 +109,7 @@ actor LocationProcessor {
             } catch is CancellationError {
                 /// cancelled, new update
             } catch {
-                print("Classification error: \(error)")
+                Logger.app.error("Classification error: \(error)")
             }
         }
     }
@@ -150,7 +151,7 @@ actor LocationProcessor {
             existing.isMeasured = true
         }
         
-        do { try modelContext.save() } catch { print("SwiftData save error: \(error)") }
+        do { try modelContext.save() } catch { Logger.app.error("SwiftData save error: \(error)") }
     }
     
     private func saveLocationEntry(_ entry: LocationEntry) {
