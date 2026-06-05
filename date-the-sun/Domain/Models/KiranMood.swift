@@ -4,17 +4,26 @@ import SwiftUI
 /// (See "KIRAN Brief Character Page".)
 nonisolated enum KiranMood: String, CaseIterable {
     case happy      // balanced — warm pink corona, beaming
-    case calm       // balanced — cool blue corona, gentle smile
     case neutral    // a little too much / too little — orange corona
-    case toxic      // way too much or too little — fiery red corona, scowling
+    case angry      // way too much or too little — fiery red corona, scowling
 
-    /// Name of the illustrated asset in the asset catalog.
+    /// Name of the illustrated asset in the asset catalog (static fallback).
     var assetName: String {
         switch self {
         case .happy:   "KiranHappy"
-        case .calm:    "KiranCalm"
         case .neutral: "KiranNeutral"
-        case .toxic:   "KiranToxic"
+        case .angry:   "KiranAngry"
+        }
+    }
+
+    /// Name of the bundled Lottie animation (a `<name>.json` in the app bundle).
+    /// Every mood is animated; the optional keeps the static `assetName` fallback
+    /// available if the Lottie package is ever absent.
+    var lottieName: String? {
+        switch self {
+        case .happy:   "KiranHappy"
+        case .neutral: "KiranNeutral"
+        case .angry:   "KiranAngry"
         }
     }
 
@@ -22,9 +31,8 @@ nonisolated enum KiranMood: String, CaseIterable {
     var accent: Color {
         switch self {
         case .happy:   Color(hex: 0xEC5F86)
-        case .calm:    Color(hex: 0x2E48C8)
         case .neutral: Color(hex: 0xF26A1B)
-        case .toxic:   Color(hex: 0xB01E1E)
+        case .angry:   Color(hex: 0xB01E1E)
         }
     }
 
@@ -32,9 +40,8 @@ nonisolated enum KiranMood: String, CaseIterable {
     var headline: String {
         switch self {
         case .happy:   "What a happy day — especially with you"
-        case .calm:    "A calm, balanced day — thanks for knowing me"
         case .neutral: "Don't get so busy you forget about me"
-        case .toxic:   "Easy — I think I need a little space today"
+        case .angry:   "Easy — I think I need a little space today"
         }
     }
 
@@ -42,9 +49,8 @@ nonisolated enum KiranMood: String, CaseIterable {
     var line: String {
         switch self {
         case .happy:   "You're so understanding and attentive of me, I can't love you enough."
-        case .calm:    "I like how you know me well and what you've been doing so far. Thank you."
         case .neutral: "I wanna see you. Don't get yourself too busy that you'd forget about me."
-        case .toxic:   "Your obsession with me is getting out of hand! I need space, stay away!"
+        case .angry:   "Your obsession with me is getting out of hand! I need space, stay away!"
         }
     }
 }
