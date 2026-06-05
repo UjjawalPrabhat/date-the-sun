@@ -15,17 +15,13 @@ class LocationEntry {
     var longitude: Double
     var horizontalAccuracy: Double
     var speed: Double
-    var course: Double
-    var altitude: Double
     var timestamp: Date
     
-    init(latitude: Double, longitude: Double, horizontalAccuracy: Double, speed: Double, course: Double, altitude: Double, timestamp: Date) {
+    init(latitude: Double, longitude: Double, horizontalAccuracy: Double, speed: Double, timestamp: Date) {
         self.latitude = latitude
         self.longitude = longitude
         self.horizontalAccuracy = horizontalAccuracy
         self.speed = speed
-        self.course = course
-        self.altitude = altitude
         self.timestamp = timestamp
     }
 }

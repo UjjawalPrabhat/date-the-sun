@@ -5,6 +5,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>dev.heryan.date-the-sun.schedule-sunset-sunrise</string>
+		<string>dev.heryan.date-the-sun.hmm-viterbi</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

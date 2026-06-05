@@ -7,9 +7,6 @@ struct TodayView: View {
     //    @Query(sort: \LocationEntry.timestamp, order: .reverse)
     //    private var entries: [LocationEntry]
     //    var latestEntry: LocationEntry? { entries.first }
-    @Query(sort: \IndoorOutdoorEntry.timestamp, order: .reverse)
-    private var entries: [IndoorOutdoorEntry]
-    var latestEntries: [IndoorOutdoorEntry] { Array(entries.prefix(2)) }
     
     let model: SunModel
     
@@ -40,30 +37,13 @@ struct TodayView: View {
             .padding(.horizontal, 24)
             .padding(.top, 8)
             
-            
-            //            if let entry = latestEntry {
-            //                DialogueBox(speaker: "Kiran", text: "\(entry.identifier), \(entry.confidence)")
-            //                    .padding(.horizontal, 18)
-            //                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            //                    .padding(.bottom, 78) // clear the floating tab bar
-            //                    .id(model.message)
-            //                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            //                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: model.message)
-            //            }
-            
-            VStack(spacing: 8) {
-                if latestEntries.isEmpty {
-                    DialogueBox(speaker: "Kiran", text: "Analysing your surroundings…")
-                } else {
-                    ForEach(latestEntries) { entry in
-                        DialogueBox(
-                            speaker: "Kiran (\(entry.provider))",
-                            text: "\(entry.identifier) — \(String(format: "%.4f", entry.confidence * 100))% confidence"
-                        )
-                    }
-                }
-                
-            }
+            DialogueBox(speaker: "Kiran", text: model.message)
+                .padding(.horizontal, 18)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 78) // clear the floating tab bar
+                .id(model.message)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: model.message)
         }
     }
 }

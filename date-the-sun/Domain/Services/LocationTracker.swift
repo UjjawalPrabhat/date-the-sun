@@ -18,8 +18,11 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         self.processor = LocationProcessor(modelContainer: modelContainer)
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-        manager.distanceFilter = 5
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters  /// `kCLLocationAccuracyBest` drains battery
+        /// 100m is supposedly OK for indoor/outdoor transition happens at building scale
+        manager.distanceFilter = 50     /// minimum meters the user must move before didUpdateLocations fires again.
+        /// 5m is sub-footstep indoors
+        /// 50m is "entered new area"
     }
     
     /// One time
@@ -34,12 +37,17 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
     func start() {
         manager.requestAlwaysAuthorization()
         manager.allowsBackgroundLocationUpdates = true
-        manager.pausesLocationUpdatesAutomatically = false
-        manager.startUpdatingLocation()
+        
+        //  manager.startUpdatingLocation()
+        /// Coarse background tracking — fires every ~500m or cell tower change
+        manager.startMonitoringSignificantLocationChanges()
+        
+        /// Schedule overnight Viterbi
+        HMMBackgroundRunner.schedule()
     }
     
     func stop() {
-        manager.stopUpdatingLocation()
+        manager.stopMonitoringSignificantLocationChanges()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -65,22 +73,31 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
 @ModelActor
 actor LocationProcessor {
     private var debounceTask: Task<Void, Never>?
-//    private let debounceInterval: Duration = .seconds(5 * 60)
-    private let debounceInterval: Duration = .seconds(5)
-    
+    private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
     
     func handleLocationUpdate(_ location: CLLocation) {
+        /// Insert for Location
         let entry = LocationEntry(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
             horizontalAccuracy: location.horizontalAccuracy,
             speed: location.speed,
-            course: location.course,
-            altitude: location.altitude,
             timestamp: location.timestamp
         )
-        modelContext.insert(entry)
-        try? modelContext.save()
+        self.saveLocationEntry(entry)
+        
+        /// Insert for HMMObservation
+        /// A synthetic outdoor, since user seems to move
+        let observation = HMMObservation(
+            classifierLabel: "outdoor",
+            classifierConfidence: location.horizontalAccuracy < 20 ? 0.45 : 0.20, /// We are confidence only if GPS accuracy below 20
+            provider: "synthetic",
+            speed: location.speed,
+            horizontalAccuracy: location.horizontalAccuracy,
+            isMeasured: false,  /// Classifier not run yet
+            timestamp: location.timestamp
+        )
+        self.saveHMMObservation(observation)
         
         debounceTask?.cancel()
         debounceTask = Task {
@@ -98,14 +115,51 @@ actor LocationProcessor {
     
     private func locationClassification(for entry: LocationEntry) async throws {
         // Run classfication
-        if let res = try await MapTileClassification.classify(lat: entry.latitude, lng: entry.longitude, isAppleMaps: true) {
-            let record = IndoorOutdoorEntry(identifier: res.identifier, confidence: Double(res.confidence), provider: "A", timestamp: Date.now)
-            modelContext.insert(record)
+        async let appleResult = MapTileClassification.classify(
+            lat: entry.latitude, lng: entry.longitude, isAppleMaps: true
+        )
+        async let googleResult = MapTileClassification.classify(
+            lat: entry.latitude, lng: entry.longitude, isAppleMaps: false
+        )
+        
+        let (apple, google) = try await (appleResult, googleResult)
+        
+        let appleSignal = apple.map { (label: $0.identifier, confidence: Double($0.confidence)) }
+        let googleSignal = google.map { (label: $0.identifier, confidence: Double($0.confidence)) }
+        let fused = HMMObservation.fuseProviders(apple: appleSignal, google: googleSignal)
+        
+        /// Time comparison
+        let ts = entry.timestamp
+        let lower = ts.addingTimeInterval(-1) // to prevent fragile comparison
+        let upper = ts.addingTimeInterval(1)
+        let descriptor = FetchDescriptor<HMMObservation>(
+            predicate: #Predicate {
+                $0.timestamp >= lower &&
+                $0.timestamp <= upper &&
+                $0.provider == "synthetic"
+            }
+        )
+        if let existing = try? modelContext.fetch(descriptor).first {
+            existing.classifierLabel = fused.label
+            existing.classifierConfidence = fused.confidence
+            existing.provider = fused.provider
+            existing.aLabel = appleSignal?.label
+            existing.aConfidence = appleSignal?.confidence
+            existing.gLabel = googleSignal?.label
+            existing.gConfidence = googleSignal?.confidence
+            existing.isMeasured = true
         }
-        if let res = try await MapTileClassification.classify(lat: entry.latitude, lng: entry.longitude, isAppleMaps: false) {
-            let record = IndoorOutdoorEntry(identifier: res.identifier, confidence: Double(res.confidence), provider: "G", timestamp: Date.now)
-            modelContext.insert(record)
-        }
+        
+        do { try modelContext.save() } catch { print("SwiftData save error: \(error)") }
+    }
+    
+    private func saveLocationEntry(_ entry: LocationEntry) {
+        modelContext.insert(entry)
+        try? modelContext.save()
+    }
+    
+    private func saveHMMObservation(_ observation: HMMObservation) {
+        modelContext.insert(observation)
         try? modelContext.save()
     }
 }

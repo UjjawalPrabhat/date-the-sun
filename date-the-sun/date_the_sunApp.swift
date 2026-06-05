@@ -8,7 +8,6 @@ struct date_the_sunApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             LocationEntry.self,
-            IndoorOutdoorEntry.self,
             SunriseSunsetSchedule.self
         ])
         let modelConfiguration = ModelConfiguration(
@@ -46,6 +45,9 @@ struct date_the_sunApp: App {
             guard let location = await LocationProvider.fetchCurrentLocation() else { return }
             let service = SolarTimeService(modelContainer: sharedModelContainer)
             try? await service.fetchAndStore(for: .now, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        }
+        .backgroundTask(.appRefresh("dev.heryan.date-the-sun.hmm-viterbi")) {
+            await HMMBackgroundRunner.run(modelContainer: sharedModelContainer)
         }
     }
 }
