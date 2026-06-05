@@ -27,7 +27,7 @@ struct HMMBackgroundRunner {
         let context = ModelContext(modelContainer)
         
         // Fetch all unprocessed observations, ordered by timestamp
-        var descriptor = FetchDescriptor<HMMObservation>(
+        let descriptor = FetchDescriptor<HMMObservation>(
             predicate: #Predicate { $0.inferredState == nil },
             sortBy: [SortDescriptor(\.timestamp, order: .forward)]
         )
@@ -38,11 +38,13 @@ struct HMMBackgroundRunner {
         // Run Viterbi
         Logger.app.info("Running Viterbi...")
         let results = HMMEngine.viterbi(observations: observations)
+        let posteriors = HMMEngine.forwardBackward(observations: observations)
         
         // Write inferred states back
-        for (observation, result) in zip(observations, results) {
+        for (i, (observation, result)) in zip(observations, results).enumerated() {
             observation.inferredState = result.state
             observation.stateProbability = result.probability
+            observation.outdoorPosterior = posteriors[i]
         }
         
         do {

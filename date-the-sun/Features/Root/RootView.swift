@@ -75,6 +75,7 @@ struct HMMObservationDebugView: View {
                             .background(state == "indoor" ? Color.blue.opacity(0.2) : Color.green.opacity(0.2))
                             .foregroundStyle(state == "indoor" ? .blue : .green)
                             .clipShape(Capsule())
+                        Text("\(obs.outdoorPosterior ?? 0.0)")
                     } else {
                         Text("pending")
                             .font(.caption2)

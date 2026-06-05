@@ -96,7 +96,8 @@ actor LocationProcessor {
             speed: location.speed,
             horizontalAccuracy: location.horizontalAccuracy,
             isMeasured: false,  /// Classifier not run yet
-            timestamp: location.timestamp
+            timestamp: location.timestamp,
+            uvIndex: nil    // fetched asyncly
         )
         self.saveHMMObservation(observation)
         
@@ -115,6 +116,7 @@ actor LocationProcessor {
     }
     
     private func locationClassification(for entry: LocationEntry) async throws {
+        let uvProvider: UVIndexProviding
         // Run classfication
         async let appleResult = MapTileClassification.classify(
             lat: entry.latitude, lng: entry.longitude, isAppleMaps: true
@@ -122,8 +124,12 @@ actor LocationProcessor {
         async let googleResult = MapTileClassification.classify(
             lat: entry.latitude, lng: entry.longitude, isAppleMaps: false
         )
+        async let uvResult = UVIndexService.fetch(
+            latitude: entry.latitude,
+            longitude: entry.longitude
+        )
         
-        let (apple, google) = try await (appleResult, googleResult)
+        let (apple, google, uv) = try await (appleResult, googleResult, uvResult)
         
         let appleSignal = apple.map { (label: $0.identifier, confidence: Double($0.confidence)) }
         let googleSignal = google.map { (label: $0.identifier, confidence: Double($0.confidence)) }
@@ -149,6 +155,7 @@ actor LocationProcessor {
             existing.gLabel = googleSignal?.label
             existing.gConfidence = googleSignal?.confidence
             existing.isMeasured = true
+            existing.uvIndex = uv
         }
         
         do { try modelContext.save() } catch { Logger.app.error("SwiftData save error: \(error)") }

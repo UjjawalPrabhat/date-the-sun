@@ -28,11 +28,14 @@ class HMMObservation {
     var isMeasured: Bool
     var timestamp: Date
     
+    var uvIndex: Int?
+    
     // HMM Output - later after Viterbi runs
     var inferredState: String?
     var stateProbability: Double?
+    var outdoorPosterior: Double?   // forward-backward γ_t(outdoor) ∈ [0,1]
     
-    init(classifierLabel: String, classifierConfidence: Double, provider: String, aLabel: String? = nil, aConfidence: Double? = nil, gLabel: String? = nil, gConfidence: Double? = nil, speed: Double, horizontalAccuracy: Double, isMeasured: Bool, timestamp: Date, inferredState: String? = nil, stateProbability: Double? = nil) {
+    init(classifierLabel: String, classifierConfidence: Double, provider: String, aLabel: String? = nil, aConfidence: Double? = nil, gLabel: String? = nil, gConfidence: Double? = nil, speed: Double, horizontalAccuracy: Double, isMeasured: Bool, timestamp: Date, uvIndex: Int? = nil, inferredState: String? = nil, stateProbability: Double? = nil, outdoorPosterior: Double? = nil) {
         self.classifierLabel = classifierLabel
         self.classifierConfidence = classifierConfidence
         self.provider = provider
@@ -44,8 +47,10 @@ class HMMObservation {
         self.horizontalAccuracy = horizontalAccuracy
         self.isMeasured = isMeasured
         self.timestamp = timestamp
+        self.uvIndex = uvIndex
         self.inferredState = inferredState
         self.stateProbability = stateProbability
+        self.outdoorPosterior = outdoorPosterior
     }
     
     /// Props to Sonnet
