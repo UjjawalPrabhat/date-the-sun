@@ -9,3 +9,7 @@ Set breakpoint after submitting the task, then run this in `lldb` terminal.
 ```shell
 e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"dev.heryan.date-the-sun.schedule-sunset-sunrise"]
 ```
+
+```shell
+e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"dev.heryan.date-the-sun.hmm-viterbi"]
+```
