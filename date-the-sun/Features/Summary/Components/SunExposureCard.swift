@@ -2,12 +2,12 @@ import SwiftUI
 
 /// The green Sun Exposure card: a 24-hour indoor/outdoor clock plus a legend.
 struct SunExposureCard: View {
-    var intervals: [SunExposureInterval]
+    var indoorOutdoorObservations: [HMMObservation] = []
 
     var body: some View {
         SectionCard(title: "Sun Exposure", systemImage: "sun.max.fill", background: .shrek) {
             VStack(spacing: 16) {
-                IndoorOutdoorClock(intervals: intervals)
+                IndoorOutdoorClock(indoorOutdoorObservations: indoorOutdoorObservations)
                     .padding(.top, 20)
 
                 HStack(spacing: 16) {
@@ -33,7 +33,8 @@ struct SunExposureCard: View {
 }
 
 #Preview {
-    SunExposureCard(intervals: SunExposureInterval.sampleDay)
+    SunExposureCard(indoorOutdoorObservations: PreviewData.observations)
         .padding()
         .background(Palette.canvas)
 }
+ 

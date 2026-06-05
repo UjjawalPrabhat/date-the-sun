@@ -5,11 +5,11 @@ import SwiftData
 /// both driven by one shared `SunModel`.
 struct RootView: View {
     let modelContainer: ModelContainer
-    @State private var viewModel: SunModel
+    @State private var viewModel: SunViewModel
     
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
-        self._viewModel = State(initialValue: SunModel(modelContainer: modelContainer))
+        self._viewModel = State(initialValue: SunViewModel(modelContainer: modelContainer))
     }
     
     @State private var selection: AppTab = .today
@@ -17,7 +17,6 @@ struct RootView: View {
     
     // Persistent AppStorage
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-
     
 #if DEBUG
     @State private var showHMMDebug = false
@@ -33,32 +32,41 @@ struct RootView: View {
                         case .today:
                             TodayView(model: viewModel)
                         case .summary:
-                            SummaryView(model: viewModel)
+                            SummaryView(viewModel: viewModel)
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     
                     FloatingTabBar(selection: $selection, namespace: tabNamespace)
                         .padding(.bottom, 6)
-
-                    #if DEBUG
-            Button("HMM Debug") { showHMMDebug = true }
-                .font(.caption2)
-                .padding(6)
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
-                .padding(.top, 8)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(.trailing, 16)
-                .sheet(isPresented: $showHMMDebug) {
-                    NavigationStack {
-                        HMMObservationDebugView()
+                    
+#if DEBUG
+//                    Button("HMM Debug") { showHMMDebug = true }
+//                        .font(.caption2)
+//                        .padding(6)
+//                        .background(.ultraThinMaterial)
+//                        .clipShape(Capsule())
+//                        .padding(.top, 8)
+//                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+//                        .padding(.trailing, 16)
+//                        .sheet(isPresented: $showHMMDebug) {
+//                            NavigationStack {
+//                                HMMObservationDebugView()
+//                            }
+//                        }
+#endif
+                    
+                    // Splash overlay
+                    if viewModel.isMainScreenDataLoading {
+                        KiranSplashScreen()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(.gray)
+                            .transition(.opacity)
+                            .zIndex(1)
                     }
                 }
-#endif
-                }
-                // Run the async task safely when the main container shows up
-                .task {
+                .animation(.easeOut(duration: 0.35), value: viewModel.isMainScreenDataLoading)
+                .task { // Run the async task safely when the main container shows up
                     await viewModel.refresh()
                 }
                 .ignoresSafeArea(.keyboard)
@@ -78,6 +86,7 @@ struct RootView: View {
 }
 
 #Preview("Normal") {
+    let _ = UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
     let container = try! ModelContainer(for: HMMObservation.self, configurations: .init(isStoredInMemoryOnly: true))
     RootView(modelContainer: container)
 }

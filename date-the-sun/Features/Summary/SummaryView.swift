@@ -3,7 +3,7 @@ import SwiftUI
 /// The Summary dashboard: a date header, a Daily/Weekly toggle, and the matching
 /// content over a cream background.
 struct SummaryView: View {
-    @Bindable var model: SunModel
+    @Bindable var viewModel: SunViewModel
     @Namespace private var periodNamespace
 
     var body: some View {
@@ -12,10 +12,10 @@ struct SummaryView: View {
 
             ScrollView {
                 VStack(spacing: 20) {
-                    SummaryHeader(dateText: model.selectedPeriod == .daily ? model.dateText : model.weekLabel)
-                    PeriodToggle(selection: $model.selectedPeriod, namespace: periodNamespace)
+                    SummaryHeader(dateText: viewModel.selectedPeriod == .daily ? viewModel.dateText : viewModel.weekLabel)
+                    PeriodToggle(selection: $viewModel.selectedPeriod, namespace: periodNamespace)
 
-                    switch model.selectedPeriod {
+                    switch viewModel.selectedPeriod {
                     case .daily:  dailyContent
                     case .weekly: weeklyContent
                     }
@@ -29,8 +29,8 @@ struct SummaryView: View {
 
     @ViewBuilder
     private var dailyContent: some View {
-        HeroCharacterCard(headline: model.headline, mood: model.mood)
-//        SunExposureCard(intervals: model.intervals)
+        HeroCharacterCard(headline: viewModel.headline, mood: viewModel.mood)
+        SunExposureCard()
 //        ProtectionLogCard(items: model.protection) { model.toggleProtection($0) }
     }
 

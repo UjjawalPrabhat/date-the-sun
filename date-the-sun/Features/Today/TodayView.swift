@@ -8,7 +8,7 @@ struct TodayView: View {
     //    private var entries: [LocationEntry]
     //    var latestEntry: LocationEntry? { entries.first }
     
-    let model: SunModel
+    let model: SunViewModel
     
     var body: some View {
         ZStack(alignment: .top) {
