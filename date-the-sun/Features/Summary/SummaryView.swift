@@ -30,22 +30,22 @@ struct SummaryView: View {
     @ViewBuilder
     private var dailyContent: some View {
         HeroCharacterCard(headline: model.headline, mood: model.mood)
-        SunExposureCard(intervals: model.intervals)
-        ProtectionLogCard(items: model.protection) { model.toggleProtection($0) }
+//        SunExposureCard(intervals: model.intervals)
+//        ProtectionLogCard(items: model.protection) { model.toggleProtection($0) }
     }
 
     @ViewBuilder
     private var weeklyContent: some View {
-        HeroCharacterCard(headline: model.weekly.headline, mood: model.weekly.mood)
-        WeeklyExposureChart(days: model.weekly.days)
-        ProtectionWeekGrid(rows: model.weekly.protection)
+//        HeroCharacterCard(headline: model.weekly.headline, mood: model.weekly.mood)
+//        WeeklyExposureChart(days: model.weekly.days)
+//        ProtectionWeekGrid(rows: model.weekly.protection)
     }
 }
 
-#Preview {
-    SummaryView(model: SunModel(
-        uvProvider: StaticUVIndexProvider(),
-        locationProvider: StaticLocationProvider(),
-        daylightProvider: MockDaylightProvider()
-    ))
-}
+//#Preview {
+//    SummaryView(model: SunModel(
+//        uvProvider: StaticUVIndexProvider(),
+//        locationProvider: StaticLocationProvider(),
+//        daylightProvider: MockDaylightProvider()
+//    ))
+//}

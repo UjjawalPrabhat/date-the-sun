@@ -34,13 +34,13 @@ struct date_the_sunApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(modelContainer: sharedModelContainer)
                 .onAppear {
                     locationTracker = LocationTracker(modelContainer: sharedModelContainer)
                     locationTracker?.start()
                     scheduleSunsetSunrise()
                     scheduleHMMViterbi()
-                    
+                    scheduleDailySummary()
 #if DEBUG
                     preloadTestData(container: sharedModelContainer)
                     
@@ -59,6 +59,10 @@ struct date_the_sunApp: App {
         }
         .backgroundTask(.appRefresh("dev.heryan.date-the-sun.hmm-viterbi")) {
             await HMMBackgroundRunner.run(modelContainer: sharedModelContainer)
+        }
+        .backgroundTask(.appRefresh("dev.heryan.date-the-sun.daily-summary")) {
+            /// TODO :  get latest use protection or no
+            await DailySummaryBackgroundRunner.run(modelContainer: sharedModelContainer, protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false))
         }
     }
     
@@ -178,5 +182,20 @@ nonisolated func scheduleHMMViterbi() {
         Logger.app.info("HMM Viterbi scheduled")
     } catch {
         Logger.app.error("Failed to schedule HMM Viterbi: \(error)")
+    }
+}
+
+nonisolated func scheduleDailySummary() {
+    let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.daily-summary")
+    request.earliestBeginDate = Calendar.current.nextDate(
+        after: .now,
+        matching: DateComponents(hour: 3, minute: 30), // 3.30 after HMM
+        matchingPolicy: .nextTime
+    )
+    do {
+        try BGTaskScheduler.shared.submit(request)
+        Logger.app.info("Daily summary scheduled")
+    } catch {
+        Logger.app.error("Failed to schedule daily summary: \(error)")
     }
 }

@@ -4,7 +4,14 @@ import SwiftData
 /// Tab container hosting the Today and Summary screens over a floating tab bar,
 /// both driven by one shared `SunModel`.
 struct RootView: View {
-    @State private var model = SunModel()
+    let modelContainer: ModelContainer
+    @State private var viewModel: SunModel
+    
+    init(modelContainer: ModelContainer) {
+        self.modelContainer = modelContainer
+        self._viewModel = State(initialValue: SunModel(modelContainer: modelContainer))
+    }
+    
     @State private var selection: AppTab = .today
     @Namespace private var tabNamespace
     
@@ -15,8 +22,8 @@ struct RootView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             switch selection {
-            case .today:   TodayView(model: model)
-            case .summary: SummaryView(model: model)
+            case .today:   TodayView(model: viewModel)
+            case .summary: SummaryView(model: viewModel)
             }
             
             FloatingTabBar(selection: $selection, namespace: tabNamespace)
@@ -38,13 +45,14 @@ struct RootView: View {
                 }
 #endif
         }
-        .task { await model.refresh() }
+        .task { await viewModel.refresh() }
         .ignoresSafeArea(.keyboard)
     }
 }
 
 #Preview {
-    RootView()
+    let container = try! ModelContainer(for: HMMObservation.self, configurations: .init(isStoredInMemoryOnly: true))
+    RootView(modelContainer: container)
 }
 
 #if DEBUG

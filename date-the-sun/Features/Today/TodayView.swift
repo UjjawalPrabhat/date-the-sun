@@ -47,11 +47,11 @@ struct TodayView: View {
         }
     }
 }
-
-#Preview {
-    TodayView(model: SunModel(
-        uvProvider: StaticUVIndexProvider(),
-        locationProvider: StaticLocationProvider(),
-        daylightProvider: MockDaylightProvider()
-    ))
-}
+//
+//#Preview {
+//    TodayView(model: SunModel(
+//        uvProvider: StaticUVIndexProvider(),
+//        locationProvider: StaticLocationProvider(),
+//        daylightProvider: MockDaylightProvider()
+//    ))
+//}
