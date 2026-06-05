@@ -21,4 +21,44 @@ nonisolated struct DeviceLocationProvider: LocationProviding {
         }
         return nil
     }
+    
+}
+
+private var associatedDelegateKey: UInt8 = 0
+
+final class LocationProvider {
+    static func fetchCurrentLocation() async -> CLLocation? {
+        await withCheckedContinuation { continuation in
+            let delegate = SingleLocationDelegate { location in
+                continuation.resume(returning: location)
+            }
+            let manager = CLLocationManager()
+            manager.delegate = delegate
+            manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+            manager.requestWhenInUseAuthorization()
+            manager.requestLocation()
+            objc_setAssociatedObject(manager, &associatedDelegateKey, delegate, .OBJC_ASSOCIATION_RETAIN)
+        }
+    }
+}
+
+private final class SingleLocationDelegate: NSObject, CLLocationManagerDelegate {
+    private let onLocation: (CLLocation?) -> Void
+    private var resumed = false
+
+    init(onLocation: @escaping (CLLocation?) -> Void) {
+        self.onLocation = onLocation
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard !resumed else { return }
+        resumed = true
+        onLocation(locations.last)
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        guard !resumed else { return }
+        resumed = true
+        onLocation(nil)
+    }
 }

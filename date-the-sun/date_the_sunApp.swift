@@ -1,6 +1,7 @@
 import BackgroundTasks
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 @main
 struct date_the_sunApp: App {
@@ -8,6 +9,7 @@ struct date_the_sunApp: App {
         let schema = Schema([
             LocationEntry.self,
             IndoorOutdoorEntry.self,
+            SunriseSunsetSchedule.self
         ])
         let modelConfiguration = ModelConfiguration(
             schema: schema,
@@ -35,24 +37,37 @@ struct date_the_sunApp: App {
                 .onAppear {
                     locationTracker = LocationTracker(modelContainer: sharedModelContainer)
                     locationTracker?.start()
-                    scheduleBackgroundRefresh()
+                    scheduleSunsetSunrise()
                 }
         }
         .modelContainer(sharedModelContainer)
-        .backgroundTask(.appRefresh("dev.heryan.date-the-sun.print")) {
-            print("Background task fired at \(Date.now)")
-            scheduleBackgroundRefresh()
+        .backgroundTask(.appRefresh("dev.heryan.date-the-sun.schedule-sunset-sunrise")) {
+            scheduleSunsetSunrise() // reschedule for next day
+            guard let location = await LocationProvider.fetchCurrentLocation() else { return }
+            let service = SolarTimeService(modelContainer: sharedModelContainer)
+            try? await service.fetchAndStore(for: .now, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
         }
     }
 }
 
-func scheduleBackgroundRefresh() {
-    let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.print")
-    request.earliestBeginDate = Date(timeIntervalSinceNow: 5)
+nonisolated func scheduleSunsetSunrise() {
+    let calendar = Calendar.current
+    /// Target 4 AM to set today's sunset sunrise
+    var components = calendar.dateComponents([.year, .month, .day], from: .now)
+    components.hour = 4
+    components.minute = 0
+    components.second = 0
+    
+    guard let tomorrow = calendar.date(from: components).flatMap({
+        calendar.date(byAdding: .day, value: 1, to: $0)
+    }) else { return }
+    
+    let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.schedule-sunset-sunrise")
+    request.earliestBeginDate = tomorrow
     do {
         try BGTaskScheduler.shared.submit(request)
-        print("✅ Background task scheduled")
+        print("Sunset sunrise scheduled for tomorrow")
     } catch {
-        print("Could not schedule app refresh: \(error)")
+        print("Failed to schedule Sunset Sunrise: \(error)")
     }
 }

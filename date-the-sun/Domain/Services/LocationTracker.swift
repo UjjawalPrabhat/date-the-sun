@@ -12,6 +12,7 @@ import SwiftData
 class LocationTracker: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private let processor: LocationProcessor
+    private var oneTimeContinuation: CheckedContinuation<CLLocation?, Never>?
     
     init(modelContainer: ModelContainer) {
         self.processor = LocationProcessor(modelContainer: modelContainer)
@@ -19,6 +20,15 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.distanceFilter = 5
+    }
+    
+    /// One time
+    func requestOneTimeLocation() async -> CLLocation? {
+        await withCheckedContinuation { continuation in
+            oneTimeContinuation = continuation
+            manager.requestWhenInUseAuthorization()
+            manager.requestLocation()
+        }
     }
     
     func start() {
@@ -34,6 +44,14 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        /// For one time location
+        if let continuation = oneTimeContinuation {
+            oneTimeContinuation = nil
+            continuation.resume(returning: location)
+            return
+        }
+        
+        /// For live location
         Task {
             await processor.handleLocationUpdate(location)
         }
