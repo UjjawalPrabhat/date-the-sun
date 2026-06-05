@@ -15,21 +15,33 @@ struct RootView: View {
     @State private var selection: AppTab = .today
     @Namespace private var tabNamespace
     
+    // Persistent AppStorage
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+
+    
 #if DEBUG
     @State private var showHMMDebug = false
 #endif
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            switch selection {
-            case .today:   TodayView(model: viewModel)
-            case .summary: SummaryView(model: viewModel)
-            }
-            
-            FloatingTabBar(selection: $selection, namespace: tabNamespace)
-                .padding(.bottom, 6)
-            
-#if DEBUG
+        Group {
+            if hasCompletedOnboarding {
+                ZStack(alignment: .bottom) {
+                    // Wrapped in a Group to keep modifiers uniform
+                    Group {
+                        switch selection {
+                        case .today:
+                            TodayView(model: viewModel)
+                        case .summary:
+                            SummaryView(model: viewModel)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    FloatingTabBar(selection: $selection, namespace: tabNamespace)
+                        .padding(.bottom, 6)
+
+                    #if DEBUG
             Button("HMM Debug") { showHMMDebug = true }
                 .font(.caption2)
                 .padding(6)
@@ -44,13 +56,28 @@ struct RootView: View {
                     }
                 }
 #endif
+                }
+                // Run the async task safely when the main container shows up
+                .task {
+                    await viewModel.refresh()
+                }
+                .ignoresSafeArea(.keyboard)
+            } else {
+                OnboardingView()
+            }
         }
-        .task { await viewModel.refresh() }
-        .ignoresSafeArea(.keyboard)
+        // Native spring animation offers a smoother swipe-away feel than .default
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: hasCompletedOnboarding)
     }
 }
 
-#Preview {
+#Preview("Onboarding") {
+    let _ = UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+    let container = try! ModelContainer(for: HMMObservation.self, configurations: .init(isStoredInMemoryOnly: true))
+    RootView(modelContainer: container)
+}
+
+#Preview("Normal") {
     let container = try! ModelContainer(for: HMMObservation.self, configurations: .init(isStoredInMemoryOnly: true))
     RootView(modelContainer: container)
 }

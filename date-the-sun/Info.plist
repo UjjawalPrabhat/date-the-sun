@@ -4,15 +4,14 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>dev.heryan.date-the-sun.schedule-sunset-sunrise</string>
 		<string>dev.heryan.date-the-sun.hmm-viterbi</string>
 		<string>dev.heryan.date-the-sun.daily-summary</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>fetch</string>
 		<string>processing</string>
+		<string>location</string>
 	</array>
 </dict>
 </plist>

@@ -38,7 +38,6 @@ struct date_the_sunApp: App {
                 .onAppear {
                     locationTracker = LocationTracker(modelContainer: sharedModelContainer)
                     locationTracker?.start()
-                    scheduleSunsetSunrise()
                     scheduleHMMViterbi()
                     scheduleDailySummary()
 #if DEBUG
@@ -51,12 +50,6 @@ struct date_the_sunApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
-        .backgroundTask(.appRefresh("dev.heryan.date-the-sun.schedule-sunset-sunrise")) {
-            scheduleSunsetSunrise() // reschedule for next day
-            guard let location = await LocationProvider.fetchCurrentLocation() else { return }
-            let service = SolarTimeService(modelContainer: sharedModelContainer)
-            try? await service.fetchAndStore(for: .now, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-        }
         .backgroundTask(.appRefresh("dev.heryan.date-the-sun.hmm-viterbi")) {
             await HMMBackgroundRunner.run(modelContainer: sharedModelContainer)
         }
@@ -147,28 +140,6 @@ extension HMMObservation {
     }
 }
 #endif
-
-nonisolated func scheduleSunsetSunrise() {
-    let calendar = Calendar.current
-    /// Target 4 AM to set today's sunset sunrise
-    var components = calendar.dateComponents([.year, .month, .day], from: .now)
-    components.hour = 4
-    components.minute = 0
-    components.second = 0
-    
-    guard let tomorrow = calendar.date(from: components).flatMap({
-        calendar.date(byAdding: .day, value: 1, to: $0)
-    }) else { return }
-    
-    let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.schedule-sunset-sunrise")
-    request.earliestBeginDate = tomorrow
-    do {
-        try BGTaskScheduler.shared.submit(request)
-        Logger.app.info("Sunset sunrise scheduled for tomorrow")
-    } catch {
-        Logger.app.error("Failed to schedule Sunset Sunrise: \(error)")
-    }
-}
 
 nonisolated func scheduleHMMViterbi() {
     let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.hmm-viterbi")

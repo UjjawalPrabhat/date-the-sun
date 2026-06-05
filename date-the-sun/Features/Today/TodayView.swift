@@ -17,9 +17,9 @@ struct TodayView: View {
             
             GeometryReader { geo in
                 InteractiveKiranView(mood: model.mood)
-                    .frame(width: geo.size.width * 0.82)
-                    .frame(maxWidth: .infinity, alignment: .top)
-                    .offset(y: geo.size.height * 0.15)
+                    .frame(width: geo.size.width)        // full-bleed; bump >1.0 to enlarge her
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .offset(y: 22)                       // sink feet past the edge so the idle float (~18px up) never opens a gap
             }
             .ignoresSafeArea()
             
