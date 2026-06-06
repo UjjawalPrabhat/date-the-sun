@@ -90,8 +90,6 @@ struct WeeklyExposureChart: View {
             score: Double.random(in: 60...100),
             wearSunscreen: Bool.random(),
             wearProtectiveClothing: Bool.random(),
-            rawUVDose: Double.random(in: 1...8),
-            effectiveUVDose: Double.random(in: 0.5...6),
             totalOutdoorMinutes: Double.random(in: 30...300),
             peakUVIndex: Int.random(in: 1...11),
             averageUVIndex: Double.random(in: 1...8),

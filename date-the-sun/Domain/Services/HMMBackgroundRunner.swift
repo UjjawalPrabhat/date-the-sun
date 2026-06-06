@@ -41,8 +41,5 @@ struct HMMBackgroundRunner {
         } catch {
             Logger.app.error("HMM background save error: \(error)")
         }
-        
-        // Reschedule for next night
-        date_the_sunApp.scheduleHMMViterbi()
     }
 }

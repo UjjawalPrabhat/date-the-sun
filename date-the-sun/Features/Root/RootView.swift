@@ -63,22 +63,22 @@ struct RootView: View {
                     
 #endif
                     
-#if DEBUG
-Button("Run Daily Summary") {
-    Task {
-        await DailySummaryBackgroundRunner.run(
-            modelContainer: modelContainer,
-            protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false)
-        )
-    }
-}
-#endif
-                    
+//#if DEBUG
+//                    Button("Run Daily Summary") {
+//                        Task {
+//                            await DailySummaryBackgroundRunner.run(
+//                                modelContainer: modelContainer,
+//                                protection: .init(wearingSunscreen: true, wearingProtectiveClothing: true)
+//                            )
+//                        }
+//                    }
+//#endif
+//                    
                     // Splash overlay
                     if viewModel.isMainScreenDataLoading {
                         KiranSplashScreen()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(.gray)
+                            .background(.white)
                             .transition(.opacity)
                             .zIndex(1)
                     }
@@ -114,12 +114,33 @@ Button("Run Daily Summary") {
 
 struct HMMObservationDebugView: View {
     @Query(sort: \HMMObservation.timestamp, order: .forward)
-    private var observations: [HMMObservation]
+    private var allObservations: [HMMObservation]
+    
+    @State private var selectedDate: Date = Calendar.current.startOfDay(for: .now)
+    
+    private var observations: [HMMObservation] {
+        allObservations.filter {
+            Calendar.current.isDate($0.timestamp, inSameDayAs: selectedDate)
+        }
+    }
+    
+    private var availableDays: [Date] {
+        let days = Set(allObservations.map {
+            Calendar.current.startOfDay(for: $0.timestamp)
+        })
+        return days.sorted()
+    }
     
     private let timeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "dd MMM HH:mm"
         f.timeZone = TimeZone(identifier: "UTC")
+        return f
+    }()
+    
+    private let dayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "d MMM"
         return f
     }()
     
@@ -198,6 +219,26 @@ struct HMMObservationDebugView: View {
         }
         .navigationTitle("HMM Observations (\(observations.count))")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Menu {
+                    ForEach(availableDays, id: \.self) { day in
+                        Button {
+                            selectedDate = day
+                        } label: {
+                            HStack {
+                                Text(dayFormatter.string(from: day))
+                                if Calendar.current.isDate(day, inSameDayAs: selectedDate) {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    Label(dayFormatter.string(from: selectedDate), systemImage: "calendar")
+                        .font(.caption)
+                }
+            }
+            
             ToolbarItem(placement: .topBarTrailing) {
                 VStack(alignment: .trailing, spacing: 2) {
                     let measured = observations.filter(\.isMeasured).count
@@ -207,6 +248,12 @@ struct HMMObservationDebugView: View {
                     Text("inferred: \(inferred)/\(observations.count)")
                         .font(.caption2).foregroundStyle(.secondary)
                 }
+            }
+        }
+        .onAppear {
+            // Snap to the most recent day that has data
+            if let latest = availableDays.last {
+                selectedDate = latest
             }
         }
     }
@@ -225,7 +272,7 @@ struct DailySunSummaryDebugView: View {
     }()
     
     var body: some View {
-        List(summaries, id: \.date) { summary in
+        List(summaries) { summary in
             VStack(alignment: .leading, spacing: 6) {
                 // Header row: date + score
                 HStack {
@@ -261,18 +308,7 @@ struct DailySunSummaryDebugView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-                
-                // Dose row
-                HStack(spacing: 12) {
-                    Label(String(format: "Raw %.2f SED", summary.rawUVDose), systemImage: "rays")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    
-                    Label(String(format: "Eff %.4f SED", summary.effectiveUVDose), systemImage: "shield.lefthalf.filled")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-                
+
                 // Protection + observation count
                 HStack(spacing: 8) {
                     protectionBadge("SPF", active: summary.wearSunscreen)
@@ -300,33 +336,33 @@ struct DailySunSummaryDebugView: View {
             }
         }
     }
-    
-    @ViewBuilder
-    private func protectionBadge(_ label: String, active: Bool) -> some View {
-        Text(label)
-            .font(.caption2.bold())
-            .padding(.horizontal, 6).padding(.vertical, 2)
-            .background(active ? Color.teal.opacity(0.2) : Color.gray.opacity(0.15))
-            .foregroundStyle(active ? .teal : .secondary)
-            .clipShape(Capsule())
+}
+
+@ViewBuilder
+private func protectionBadge(_ label: String, active: Bool) -> some View {
+    Text(label)
+        .font(.caption2.bold())
+        .padding(.horizontal, 6).padding(.vertical, 2)
+        .background(active ? Color.teal.opacity(0.2) : Color.gray.opacity(0.15))
+        .foregroundStyle(active ? .teal : .secondary)
+        .clipShape(Capsule())
+}
+
+private func scoreColor(_ score: Double) -> Color {
+    switch score {
+    case 70...: return .green
+    case 40...: return .orange
+    default:    return .red
     }
-    
-    private func scoreColor(_ score: Double) -> Color {
-        switch score {
-        case 70...: return .green
-        case 40...: return .orange
-        default:    return .red
-        }
-    }
-    
-    private func uvColor(_ uv: Int) -> Color {
-        switch uv {
-        case 0...2:  return .green
-        case 3...5:  return .yellow
-        case 6...7:  return .orange
-        case 8...10: return .red
-        default:     return .purple
-        }
+}
+
+private func uvColor(_ uv: Int) -> Color {
+    switch uv {
+    case 0...2:  return .green
+    case 3...5:  return .yellow
+    case 6...7:  return .orange
+    case 8...10: return .red
+    default:     return .purple
     }
 }
 #endif

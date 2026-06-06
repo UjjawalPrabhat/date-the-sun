@@ -58,9 +58,9 @@ nonisolated enum KiranMood: String, CaseIterable {
 extension KiranMood {
     static func from(uvIndex: Int) -> KiranMood {
         switch uvIndex {
-        case 0...5: return .happy
-        case 6...7: return .neutral
-        case 8...12: return .angry
+        case 0...3: return .happy
+        case 4...6: return .neutral
+        case 7...12: return .angry
         default:    return .neutral
         }
     }

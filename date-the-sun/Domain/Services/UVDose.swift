@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 struct ProtectionProfile {
     var wearingSunscreen: Bool
@@ -25,11 +26,9 @@ struct ProtectionProfile {
 }
 
 /// Props to Sonnet
-/// Cheat to pass static class in Swift
 enum UVDose {
     static func computeUVDose(
-        observations: [HMMObservation],
-        protection: ProtectionProfile
+        observations: [HMMObservation]
     ) -> Double {
         var totalDose = 0.0
         
@@ -45,23 +44,23 @@ enum UVDose {
             
             totalDose += Double(uvIndex) * effectiveMinutes * posterior
         }
-        return totalDose * protection.exposureMultiplier
+        return totalDose
     }
     /// TODO : Can add more parameters like skin type
-    static func computeSunScore(effectiveDose: Double) -> Double {
-        let target = 60.0
-        let tolerance = 30.0
-        let exponent = -pow(effectiveDose - target, 2) / (2 * pow(tolerance, 2))
-        let bellScore = exp(exponent)
-        let ghostPenalty = effectiveDose < 5.0 ? 0.6 : 1.0
-        return bellScore * ghostPenalty * 100
+    static func computeSunScore(effectiveDose: Double, protection: ProtectionProfile) -> Double {
+        var saturationPoint = 100.0
+        if protection.wearingSunscreen          { saturationPoint += 30.0 }
+        if protection.wearingProtectiveClothing { saturationPoint += 20.0 }
+        let score = (1 - exp(-effectiveDose / saturationPoint)) * 100
+        return score
     }
-    
+    /// Calculate and return Kiran Score given a day's observations and its protection profile
     static func dailyKiranScore(
         observations: [HMMObservation],
         protection: ProtectionProfile
     ) -> Double {
-        let dose = computeUVDose(observations: observations, protection: protection)
-        return computeSunScore(effectiveDose: dose)
+        let dose = computeUVDose(observations: observations)
+        Logger.dailySummary.info("Raw UV dose: \(dose)")
+        return computeSunScore(effectiveDose: dose, protection: protection)
     }
 }

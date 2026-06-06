@@ -8,11 +8,9 @@
 import OSLog
 
 extension Logger {
-    private static let subsystem = Bundle.main.bundleIdentifier ?? "dev.heryan.date-the-sun"
-
-    static let app          = Logger(subsystem: subsystem, category: "App")
-    static let location     = Logger(subsystem: subsystem, category: "Location")
-    static let solar        = Logger(subsystem: subsystem, category: "Solar")
-    static let hmm          = Logger(subsystem: subsystem, category: "HMM")
-    static let background   = Logger(subsystem: subsystem, category: "Background")
+    static let app        = Logger(subsystem: "dev.heryan.date-the-sun", category: "App")
+    static let location   = Logger(subsystem: "dev.heryan.date-the-sun", category: "Location")
+    static let hmm        = Logger(subsystem: "dev.heryan.date-the-sun", category: "HMM")
+    static let dailySummary = Logger(subsystem: "dev.heryan.date-the-sun", category: "DailySummary")
+    static let background = Logger(subsystem: "dev.heryan.date-the-sun", category: "Background")
 }
