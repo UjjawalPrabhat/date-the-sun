@@ -37,7 +37,7 @@ struct SummaryView: View {
             }
         }
         .sheet(isPresented: $showCalendar) {
-            CalendarPickerSheet(selectedDate: $viewModel.selectedDate)
+            CalendarPickerSheet(selectedDate: $viewModel.selectedDate, summaries: viewModel.allSummaries)
         }
     }
 

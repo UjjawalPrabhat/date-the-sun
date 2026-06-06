@@ -82,6 +82,9 @@ final class SunViewModel {
     private(set) var selectedObservations: [HMMObservation] = []
     private(set) var dailySummaries: [DailySunSummary] = []
 
+    /// All summaries keyed by startOfDay — passed to the calendar picker for mood indicators.
+    private(set) var allSummaries: [Date: DailySunSummary] = [:]
+
     /// Keyed by startOfDay for O(1) lookup in ProtectionWeekGrid.
     var weeklyProtectionLogs: [Date: DailySunSummary] {
         Dictionary(
@@ -144,6 +147,7 @@ final class SunViewModel {
         try? fetchObservations(for: selectedDate)
         try? fetchDailySummary(for: selectedDate)
         try? fetchWeeklySummaries()
+        try? fetchAllSummaries()
 
         withAnimation(.easeInOut(duration: 0.35)) {
             updateDailyMood()
@@ -188,6 +192,18 @@ final class SunViewModel {
         )
         dailySummaries = try modelContext.fetch(descriptor)
         updateWeeklyMood()
+    }
+
+    /// Fetches every DailySunSummary for the calendar mood indicators.
+    func fetchAllSummaries() throws {
+        let descriptor = FetchDescriptor<DailySunSummary>(
+            sortBy: [SortDescriptor(\.date, order: .forward)]
+        )
+        let all = try modelContext.fetch(descriptor)
+        allSummaries = Dictionary(
+            all.map { (Calendar.current.startOfDay(for: $0.date), $0) },
+            uniquingKeysWith: { _, latest in latest }
+        )
     }
 
     // MARK: - Mood
