@@ -26,7 +26,7 @@ nonisolated enum KiranMood: String, CaseIterable {
         case .angry:   "KiranAngry"
         }
     }
-
+    
     /// Corona color, useful for tinting accents to match Kiran's mood.
     var accent: Color {
         switch self {
@@ -35,7 +35,7 @@ nonisolated enum KiranMood: String, CaseIterable {
         case .angry:   Color(hex: 0xB01E1E)
         }
     }
-
+    
     /// The bold hero headline shown on the Summary screen for this mood.
     var headline: String {
         switch self {
@@ -44,7 +44,7 @@ nonisolated enum KiranMood: String, CaseIterable {
         case .angry:   "Easy — I think I need a little space today"
         }
     }
-
+    
     /// A representative line of dialogue from the character brief.
     var line: String {
         switch self {
@@ -53,4 +53,23 @@ nonisolated enum KiranMood: String, CaseIterable {
         case .angry:   "Your obsession with me is getting out of hand! I need space, stay away!"
         }
     }
+}
+
+extension KiranMood {
+    static func from(uvIndex: Int) -> KiranMood {
+        switch uvIndex {
+        case 0...3: return .happy
+        case 4...6: return .neutral
+        case 7...12: return .angry
+        default:    return .neutral
+        }
+    }
+    
+    static func from(score: Double) -> KiranMood {
+            switch score {
+            case 60...70:           return .happy
+            case 40..<60, 70..<80:  return .neutral
+            default:                return .angry
+            }
+        }
 }

@@ -30,7 +30,7 @@ struct OnboardingPageView: View {
                 Spacer()
                 
                 Text(title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(AppFont.semibold(32))
                     .foregroundColor(.black)
                 
                 Text(description)

@@ -3,8 +3,9 @@ import SwiftUI
 /// The Summary dashboard: a date header, a Daily/Weekly toggle, and the matching
 /// content over a cream background.
 struct SummaryView: View {
-    @Bindable var model: SunModel
+    @Bindable var viewModel: SunViewModel
     @Namespace private var periodNamespace
+    @State private var showCalendar = false
 
     var body: some View {
         ZStack {
@@ -12,11 +13,21 @@ struct SummaryView: View {
 
             ScrollView {
                 VStack(spacing: 20) {
-                    SummaryHeader(dateText: model.selectedPeriod == .daily ? model.dateText : model.weekLabel)
-                    PeriodToggle(selection: $model.selectedPeriod, namespace: periodNamespace)
+                    SummaryHeader(
+                        dateText: viewModel.selectedPeriod == .daily
+                            ? viewModel.selectedDateLabel
+                            : viewModel.weekLabel,
+                        onCalendarTap: { showCalendar = true }
+                    )
+                    PeriodToggle(selection: $viewModel.selectedPeriod, namespace: periodNamespace)
 
-                    switch model.selectedPeriod {
-                    case .daily:  dailyContent
+                    switch viewModel.selectedPeriod {
+                    case .daily:
+                        if viewModel.isSelectedDateToday {
+                            TodayNotReadyCard()
+                        } else {
+                            dailyContent
+                        }
                     case .weekly: weeklyContent
                     }
                 }
@@ -25,27 +36,66 @@ struct SummaryView: View {
                 .padding(.bottom, 100) // clear the floating tab bar
             }
         }
+        .sheet(isPresented: $showCalendar) {
+            CalendarPickerSheet(selectedDate: $viewModel.selectedDate, summaries: viewModel.allSummaries)
+        }
     }
 
     @ViewBuilder
     private var dailyContent: some View {
-        HeroCharacterCard(headline: model.headline, mood: model.mood)
-        SunExposureCard(intervals: model.intervals)
-        ProtectionLogCard(items: model.protection) { model.toggleProtection($0) }
+        HeroCharacterCard(headline: viewModel.selectedDateHeadline, mood: viewModel.selectedDateMood)
+        SunExposureCard(indoorOutdoorObservations: viewModel.selectedObservations, uvPeakWindow: viewModel.uvPeakWindow)
+        ProtectionLogCard(items: viewModel.protectionItems) { viewModel.toggleProtection($0) }
     }
 
     @ViewBuilder
     private var weeklyContent: some View {
-        HeroCharacterCard(headline: model.weekly.headline, mood: model.weekly.mood)
-        WeeklyExposureChart(days: model.weekly.days)
-        ProtectionWeekGrid(rows: model.weekly.protection)
+        HeroCharacterCard(headline: viewModel.weeklyHeadline, mood: viewModel.weeklyMood)
+        WeeklyExposureChart(days: viewModel.dailySummaries)
+        ProtectionWeekGrid(days: viewModel.dailySummaries)
     }
 }
 
-#Preview {
-    SummaryView(model: SunModel(
-        uvProvider: StaticUVIndexProvider(),
-        locationProvider: StaticLocationProvider(),
-        daylightProvider: MockDaylightProvider()
-    ))
+/// Shown in the daily view when the user selects today — data isn't ready until the next morning.
+private struct TodayNotReadyCard: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(Palette.heroSky.opacity(0.25))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "sun.haze.fill")
+                    .font(.system(size: 38))
+                    .foregroundStyle(Palette.pill)
+            }
+
+            VStack(spacing: 8) {
+                Text("Very excited to see how I feel, huh?")
+                    .font(AppFont.semibold(18))
+                    .foregroundStyle(Palette.ink)
+                    .multilineTextAlignment(.center)
+
+                Text("I will tell you how I feel when I'm ready (probably tomorrow).")
+                    .font(AppFont.regular(14))
+                    .foregroundStyle(Palette.rowSubtitle)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+            }
+        }
+        .padding(.vertical, 32)
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white)
+        )
+    }
 }
+
+//#Preview {
+//    SummaryView(model: SunModel(
+//        uvProvider: StaticUVIndexProvider(),
+//        locationProvider: StaticLocationProvider(),
+//        daylightProvider: MockDaylightProvider()
+//    ))
+//}
