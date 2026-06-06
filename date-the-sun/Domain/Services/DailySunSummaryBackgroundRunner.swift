@@ -35,9 +35,13 @@ struct DailySummaryBackgroundRunner {
         let summaryDescriptor = FetchDescriptor<DailySunSummary>(
             predicate: #Predicate { $0.date >= targetDay && $0.date < nextDay }
         )
-        if (try? context.fetch(summaryDescriptor).first) != nil {
-            Logger.dailySummary.info("Summary already exists for \(targetDay), skipping")
-            return
+        if let existing = try? context.fetch(summaryDescriptor).first {
+            if existing.observationCount > 0 {
+                Logger.dailySummary.info("Real summary already exists for \(targetDay), skipping")
+                return
+            }
+            // Remove the init placeholder so the real summary can be inserted
+            context.delete(existing)
         }
         
         Logger.dailySummary.info("Computing daily summary for \(targetDay)...")

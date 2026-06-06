@@ -34,18 +34,22 @@ struct date_the_sunApp: App {
             forTaskWithIdentifier: "dev.heryan.date-the-sun.hmm-viterbi",
             using: nil
         ) { task in
-            Task {
+            let work = Task {
                 await HMMBackgroundRunner.run(modelContainer: container)
                 await MainActor.run { BackgroundScheduler.scheduleHMMViterbi() }
                 task.setTaskCompleted(success: true)
             }
+            task.expirationHandler = {
+                work.cancel()
+                task.setTaskCompleted(success: false)
+            }
         }
-        
+
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: "dev.heryan.date-the-sun.daily-summary",
             using: nil
         ) { task in
-            Task {
+            let work = Task {
                 await DailySummaryBackgroundRunner.run(
                     modelContainer: container,
                     protection: .init(wearingSunscreen: true, wearingProtectiveClothing: true)
@@ -53,16 +57,24 @@ struct date_the_sunApp: App {
                 await MainActor.run { BackgroundScheduler.scheduleDailySummary() }
                 task.setTaskCompleted(success: true)
             }
+            task.expirationHandler = {
+                work.cancel()
+                task.setTaskCompleted(success: false)
+            }
         }
 
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: "dev.heryan.date-the-sun.daily-sun-summary-init",
             using: nil
         ) { task in
-            Task {
+            let work = Task {
                 await DailySunSummaryInitBackgroundRunner.run(modelContainer: container)
                 await MainActor.run { BackgroundScheduler.scheduleDailySunSummaryInit() }
                 task.setTaskCompleted(success: true)
+            }
+            task.expirationHandler = {
+                work.cancel()
+                task.setTaskCompleted(success: false)
             }
         }
     }
