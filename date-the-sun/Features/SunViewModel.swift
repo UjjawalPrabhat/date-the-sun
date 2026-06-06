@@ -23,8 +23,13 @@ final class SunViewModel {
         didSet {
             try? fetchObservations(for: selectedDate)
             try? fetchDailySummary(for: selectedDate)
+            try? fetchWeeklySummaries()
             updateDailyMood()
         }
+    }
+
+    var isSelectedDateToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
     }
 
     var selectedDateLabel: String {
@@ -33,6 +38,7 @@ final class SunViewModel {
         let selected = calendar.startOfDay(for: selectedDate)
         let days     = calendar.dateComponents([.day], from: selected, to: today).day ?? 0
         switch days {
+        case 0:  return "Today"
         case 1:  return "Yesterday"
         case 2:  return "2 days ago"
         case 3:  return "3 days ago"
@@ -84,13 +90,14 @@ final class SunViewModel {
         )
     }
 
+    /// Shows the 7-day window ending the day before selectedDate.
     var weekLabel: String {
-        let calendar     = Calendar.current
-        let today        = calendar.startOfDay(for: .now)
-        let yesterday    = calendar.date(byAdding: .day, value: -1, to: today)!
-        let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: today)!
-        let start = sevenDaysAgo.formatted(.dateTime.day().month())
-        let end   = yesterday.formatted(.dateTime.day().month())
+        let calendar    = Calendar.current
+        let selectedDay = calendar.startOfDay(for: selectedDate)
+        let endDay      = calendar.date(byAdding: .day, value: -1, to: selectedDay)!
+        let startDay    = calendar.date(byAdding: .day, value: -7, to: selectedDay)!
+        let start = startDay.formatted(.dateTime.day().month())
+        let end   = endDay.formatted(.dateTime.day().month())
         return "\(start) – \(end)"
     }
 
@@ -168,11 +175,12 @@ final class SunViewModel {
         selectedDailySummary = try modelContext.fetch(descriptor).first
     }
 
+    /// Fetches the 7-day window ending the day before selectedDate.
     func fetchWeeklySummaries() throws {
         let calendar     = Calendar.current
-        let today        = calendar.startOfDay(for: .now)
-        let yesterday    = calendar.date(byAdding: .day, value: -1, to: today)!
-        let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+        let selectedDay  = calendar.startOfDay(for: selectedDate)
+        let yesterday    = calendar.date(byAdding: .day, value: -1, to: selectedDay)!
+        let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: selectedDay)!
 
         let descriptor = FetchDescriptor<DailySunSummary>(
             predicate: #Predicate { $0.date >= sevenDaysAgo && $0.date <= yesterday },
