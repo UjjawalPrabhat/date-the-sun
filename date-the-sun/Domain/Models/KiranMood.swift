@@ -64,4 +64,12 @@ extension KiranMood {
         default:    return .neutral
         }
     }
+    
+    static func from(score: Double) -> KiranMood {
+            switch score {
+            case 60...70:           return .happy
+            case 40..<60, 70..<80:  return .neutral
+            default:                return .angry
+            }
+        }
 }

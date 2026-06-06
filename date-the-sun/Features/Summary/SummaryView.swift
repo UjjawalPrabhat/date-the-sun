@@ -12,7 +12,11 @@ struct SummaryView: View {
 
             ScrollView {
                 VStack(spacing: 20) {
-                    SummaryHeader(dateText: viewModel.selectedPeriod == .daily ? viewModel.selectedDateLabel : viewModel.weekLabel)
+                    SummaryHeader(
+                        dateText: viewModel.selectedPeriod == .daily
+                            ? viewModel.selectedDateLabel
+                            : viewModel.weekLabel
+                    )
                     PeriodToggle(selection: $viewModel.selectedPeriod, namespace: periodNamespace)
 
                     switch viewModel.selectedPeriod {
@@ -30,15 +34,15 @@ struct SummaryView: View {
     @ViewBuilder
     private var dailyContent: some View {
         HeroCharacterCard(headline: viewModel.headline, mood: viewModel.mood)
-        SunExposureCard(indoorOutdoorObservations: viewModel.yesterdaySummary)
-//        ProtectionLogCard(items: model.protection) { model.toggleProtection($0) }
+        SunExposureCard(indoorOutdoorObservations: viewModel.selectedObservations)
+        ProtectionLogCard(items: viewModel.protectionItems) { viewModel.toggleProtection($0) }
     }
 
     @ViewBuilder
     private var weeklyContent: some View {
-//        HeroCharacterCard(headline: model.weekly.headline, mood: model.weekly.mood)
+        HeroCharacterCard(headline: viewModel.weeklyHeadline, mood: viewModel.weeklyMood)
         WeeklyExposureChart(days: viewModel.dailySummaries)
-//        ProtectionWeekGrid(rows: model.weekly.protection)
+        ProtectionWeekGrid(days: viewModel.dailySummaries)
     }
 }
 

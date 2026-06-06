@@ -71,7 +71,7 @@ struct date_the_sunApp: App {
                     preloadTestData(container: sharedModelContainer)
                     Task {
                         await HMMBackgroundRunner.run(modelContainer: sharedModelContainer)
-                        await backfillTestSummaries(container: sharedModelContainer, protection: .init(wearingSunscreen: true, wearingProtectiveClothing: false))
+                        await backfillTestSummaries(container: sharedModelContainer)
 //                        await DailySummaryBackgroundRunner.run(
 //                            modelContainer: sharedModelContainer,
 //                            protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false)
@@ -88,6 +88,15 @@ struct date_the_sunApp: App {
 #if DEBUG
 private func preloadTestData(container: ModelContainer) {
     let context = ModelContext(container)
+    
+    /// skip if exist
+    let descriptor = FetchDescriptor<HMMObservation>()
+    let existing = try? context.fetch(descriptor)
+    guard existing?.isEmpty ?? true else {
+        Logger.app.info("Test data already present, skipping insertion")
+        return
+    }
+    
     Logger.app.info("Inserting test data")
 
     let calendar = Calendar.current
@@ -189,10 +198,14 @@ private func preloadTestData(container: ModelContainer) {
 #endif
 
 #if DEBUG
-private func backfillTestSummaries(container: ModelContainer, protection: ProtectionProfile) async {
+private func backfillTestSummaries(container: ModelContainer) async {
+    let context = ModelContext(container)
     let calendar = Calendar.current
-    for offset in 2...7 {
+    for offset in 1...7 {
         let date = calendar.date(byAdding: .day, value: -offset + 1, to: .now)!
+        let isWearingSunscreen = Bool.random()
+        let isWearingProtection = Bool.random()
+        let protection = ProtectionProfile(wearingSunscreen: isWearingSunscreen, wearingProtectiveClothing: isWearingProtection)
         await DailySummaryBackgroundRunner.run(
             modelContainer: container,
             protection: protection,
