@@ -210,9 +210,11 @@ final class SunViewModel {
         updateWeeklyMood()
     }
 
-    /// Fetches every DailySunSummary for the calendar mood indicators.
+    /// Fetches DailySummaries for the calendar mood indicators, capped at 90 days.
     func fetchAllSummaries() throws {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -90, to: .now)!
         let descriptor = FetchDescriptor<DailySunSummary>(
+            predicate: #Predicate { $0.date >= cutoff },
             sortBy: [SortDescriptor(\.date, order: .forward)]
         )
         let all = try modelContext.fetch(descriptor)

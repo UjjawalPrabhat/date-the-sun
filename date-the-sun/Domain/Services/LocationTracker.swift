@@ -9,7 +9,7 @@ import CoreLocation
 import SwiftData
 import OSLog
 
-let locationPrecise = true
+let locationPrecise = false
 
 @Observable
 class LocationTracker: NSObject, CLLocationManagerDelegate {
@@ -22,8 +22,8 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         if locationPrecise {
-            //        manager.desiredAccuracy = kCLLocationAccuracyBest /// `kCLLocationAccuracyBest` drains battery
-            //        manager.distanceFilter = 10     /// minimum meters the user must move before didUpdateLocations fires again.
+            manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            manager.distanceFilter = 10     /// only fires when user moves 10 real meters; suppresses GPS noise when stationary
         } else {
             manager.desiredAccuracy = kCLLocationAccuracyHundredMeters  /// `kCLLocationAccuracyBest` drains battery
             /// 100m is supposedly OK for indoor/outdoor transition happens at building scale
@@ -49,7 +49,6 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         
         if locationPrecise {
             manager.startUpdatingLocation()
-            
         } else {
             //  manager.startUpdatingLocation()
             /// Coarse background tracking — fires every ~500m or cell tower change
