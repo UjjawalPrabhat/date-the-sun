@@ -9,6 +9,8 @@ import CoreLocation
 import SwiftData
 import OSLog
 
+let locationPrecise = true
+
 @Observable
 class LocationTracker: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
@@ -19,11 +21,16 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         self.processor = LocationProcessor(modelContainer: modelContainer)
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters  /// `kCLLocationAccuracyBest` drains battery
-        /// 100m is supposedly OK for indoor/outdoor transition happens at building scale
-        manager.distanceFilter = 50     /// minimum meters the user must move before didUpdateLocations fires again.
-        /// 5m is sub-footstep indoors
-        /// 50m is "entered new area"
+        if locationPrecise {
+            //        manager.desiredAccuracy = kCLLocationAccuracyBest /// `kCLLocationAccuracyBest` drains battery
+            //        manager.distanceFilter = 10     /// minimum meters the user must move before didUpdateLocations fires again.
+        } else {
+            manager.desiredAccuracy = kCLLocationAccuracyHundredMeters  /// `kCLLocationAccuracyBest` drains battery
+            /// 100m is supposedly OK for indoor/outdoor transition happens at building scale
+            manager.distanceFilter = 50     /// minimum meters the user must move before didUpdateLocations fires again.
+            /// 5m is sub-footstep indoors
+            /// 50m is "entered new area"
+        }
     }
     
     /// One time
@@ -36,12 +43,18 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
     }
     
     func start() {
+        Logger.location.info("Started location update")
         manager.requestAlwaysAuthorization()
         manager.allowsBackgroundLocationUpdates = true
         
-        //  manager.startUpdatingLocation()
-        /// Coarse background tracking — fires every ~500m or cell tower change
-        manager.startMonitoringSignificantLocationChanges()
+        if locationPrecise {
+            manager.startUpdatingLocation()
+            
+        } else {
+            //  manager.startUpdatingLocation()
+            /// Coarse background tracking — fires every ~500m or cell tower change
+            manager.startMonitoringSignificantLocationChanges()
+        }
     }
     
     func stop() {
@@ -71,7 +84,9 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
 @ModelActor
 actor LocationProcessor {
     private var debounceTask: Task<Void, Never>?
-    private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
+    
+        private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
+//    private let debounceInterval: Duration = .seconds(10) // 2 min still = user is static
     
     func handleLocationUpdate(_ location: CLLocation) {
         /// Insert for Location

@@ -18,11 +18,6 @@ struct RootView: View {
     // Persistent AppStorage
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     
-#if DEBUG
-    @State private var showHMMDebug = false
-    @State private var showSummaryDebug = false
-#endif
-    
     var body: some View {
         Group {
             if hasCompletedOnboarding {
@@ -40,41 +35,6 @@ struct RootView: View {
                     FloatingTabBar(selection: $selection, namespace: tabNamespace)
                         .padding(.bottom, 6)
                     
-#if DEBUG
-                    HStack(spacing: 8) {
-                        Button("HMM") { showHMMDebug = true }
-                            .sheet(isPresented: $showHMMDebug) {
-                                NavigationStack { HMMObservationDebugView() }
-                            }
-                        
-                        Button("Summary") { showSummaryDebug = true }
-                            .sheet(isPresented: $showSummaryDebug) {
-                                NavigationStack { DailySunSummaryDebugView() }
-                            }
-                    }
-                    .font(.caption2)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .padding(.top, 8)
-                    .padding(.trailing, 16)
-                    
-#endif
-                    
-//#if DEBUG
-//                    Button("Run Daily Summary") {
-//                        Task {
-//                            await DailySummaryBackgroundRunner.run(
-//                                modelContainer: modelContainer,
-//                                protection: .init(wearingSunscreen: true, wearingProtectiveClothing: true)
-//                            )
-//                        }
-//                    }
-//#endif
-//                    
-                    // Splash overlay
                     if viewModel.isMainScreenDataLoading {
                         KiranSplashScreen()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -308,7 +268,7 @@ struct DailySunSummaryDebugView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-
+                
                 // Protection + observation count
                 HStack(spacing: 8) {
                     protectionBadge("SPF", active: summary.wearSunscreen)

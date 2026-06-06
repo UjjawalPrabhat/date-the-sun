@@ -30,7 +30,6 @@ struct date_the_sunApp: App {
         AppFont.registerBundledFonts()
         let container = sharedModelContainer
         
-        // Registration MUST happen here — before scene setup
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: "dev.heryan.date-the-sun.hmm-viterbi",
             using: nil
@@ -72,13 +71,14 @@ struct date_the_sunApp: App {
                     Task {
                         await HMMBackgroundRunner.run(modelContainer: sharedModelContainer)
                         await backfillTestSummaries(container: sharedModelContainer)
-//                        await DailySummaryBackgroundRunner.run(
-//                            modelContainer: sharedModelContainer,
-//                            protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false)
-//                        )
+                        await DailySummaryBackgroundRunner.run(
+                            modelContainer: sharedModelContainer,
+                            protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false)
+                        )
                     }
 #endif
                 }
+                .debugSheet(modelContainer: sharedModelContainer)
         }
         .modelContainer(sharedModelContainer)
     }
