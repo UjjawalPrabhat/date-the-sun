@@ -5,7 +5,9 @@ import SwiftUI
 /// the peak-UV window as a separate thinner orange arc just outside the ring.
 struct IndoorOutdoorClock: View {
     var indoorOutdoorObservations: [HMMObservation]
-    
+    /// The contiguous window (start/end minutes-of-day) where UV forecast ≥ 6. Nil hides the arc.
+    var uvPeakWindow: (startMinute: Double, endMinute: Double)?
+
     private let dialSize: CGFloat = 240
     private let faceDiameter: CGFloat = 150
     private let ringRadius: CGFloat = 96
@@ -14,9 +16,6 @@ struct IndoorOutdoorClock: View {
     private let uvWidth: CGFloat = 10
     private let labelRadius: CGFloat = 41
     private let tickRadius: CGFloat = 66
-    
-    // Midday peak-UV window (≈11am–1pm), drawn as a separate arc near the bottom of the dial.
-    private let uvWindow = (start: 660.0, end: 780.0)
     
     private struct Interval: Identifiable {
         let id = UUID()
@@ -59,8 +58,10 @@ struct IndoorOutdoorClock: View {
                             style: StrokeStyle(lineWidth: ringWidth, lineCap: .round))
             }
             
-            RingArc(startMinute: uvWindow.start, endMinute: uvWindow.end, radius: uvRadius)
-                .stroke(Color.vermillion, style: StrokeStyle(lineWidth: uvWidth, lineCap: .round))
+            if let uvPeakWindow {
+                RingArc(startMinute: uvPeakWindow.startMinute, endMinute: uvPeakWindow.endMinute, radius: uvRadius)
+                    .stroke(Color.vermillion, style: StrokeStyle(lineWidth: uvWidth, lineCap: .round))
+            }
             
             Circle()
                 .fill(.white)
@@ -130,7 +131,10 @@ private struct RingArc: Shape {
 }
 
 #Preview {
-IndoorOutdoorClock(indoorOutdoorObservations: PreviewData.observations)
-        .padding()
-        .background(Color.shrek)
+    IndoorOutdoorClock(
+        indoorOutdoorObservations: PreviewData.observations,
+        uvPeakWindow: PreviewData.uvPeakWindow
+    )
+    .padding()
+    .background(Color.shrek)
 }

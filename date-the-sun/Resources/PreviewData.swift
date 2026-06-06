@@ -14,6 +14,9 @@ enum PreviewData { // as static
     static func t(_ h: Int, _ m: Int = 0) -> Date {
         cal.date(bySettingHour: h, minute: m, second: 0, of: today)!
     }
+    /// 10 am – 2 pm UV peak window (UV ≥ 6), representative of a sunny summer day.
+    static let uvPeakWindow: (startMinute: Double, endMinute: Double) = (startMinute: 600, endMinute: 840)
+
     static let observations: [HMMObservation] = [
         .init(classifierLabel: "indoor",  classifierConfidence: 0.95, provider: "A",  speed: 0.0, horizontalAccuracy: 4,  isMeasured: true, timestamp: t(0)),
         .init(classifierLabel: "indoor",  classifierConfidence: 0.91, provider: "A",  speed: 0.0, horizontalAccuracy: 4,  isMeasured: true, timestamp: t(6)),

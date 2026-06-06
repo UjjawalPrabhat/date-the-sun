@@ -7,6 +7,7 @@ import Observation
 final class SunViewModel {
     // MARK: - Main Screen
     private(set) var isMainScreenDataLoading: Bool = true
+    /// Kiran's mood for the Today screen — reflects live UV index only, never changed by browsing history.
     private(set) var mood: KiranMood = .neutral
     private(set) var uvIndex: Int
     var headline: String { mood.headline }
@@ -14,6 +15,9 @@ final class SunViewModel {
 
     // MARK: - Summary Screen: Daily
     private(set) var selectedDailySummary: DailySunSummary?
+    /// Kiran's mood for the selected historical date in the Summary screen.
+    private(set) var selectedDateMood: KiranMood = .neutral
+    var selectedDateHeadline: String { selectedDateMood.headline }
 
     private(set) var weeklyMood: KiranMood = .neutral
     var weeklyHeadline: String { weeklyMood.headline }
@@ -24,7 +28,8 @@ final class SunViewModel {
             try? fetchObservations(for: selectedDate)
             try? fetchDailySummary(for: selectedDate)
             try? fetchWeeklySummaries()
-            updateDailyMood()
+            updateSelectedDateMood()
+            Task { await fetchUVPeakWindow(for: selectedDate) }
         }
     }
 
@@ -77,6 +82,10 @@ final class SunViewModel {
         try? modelContext.save()
         try? fetchDailySummary(for: selectedDate)
     }
+
+    // MARK: - UV Peak Window
+    /// Start/end of the contiguous period where UV forecast ≥ 6, in minutes-of-day (0–1440).
+    private(set) var uvPeakWindow: (startMinute: Double, endMinute: Double)? = nil
 
     // MARK: - Summary Screen: Weekly
     private(set) var selectedObservations: [HMMObservation] = []
@@ -143,14 +152,21 @@ final class SunViewModel {
         ) {
             uvIndex = uv
         }
-        
+
+        uvPeakWindow = try? await uvProvider.uvPeakWindow(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            date: selectedDate
+        )
+
         try? fetchObservations(for: selectedDate)
         try? fetchDailySummary(for: selectedDate)
         try? fetchWeeklySummaries()
         try? fetchAllSummaries()
 
         withAnimation(.easeInOut(duration: 0.35)) {
-            updateDailyMood()
+            mood = .from(uvIndex: uvIndex)
+            updateSelectedDateMood()
         }
     }
 
@@ -206,12 +222,21 @@ final class SunViewModel {
         )
     }
 
+    private func fetchUVPeakWindow(for date: Date) async {
+        let coordinate = await locationProvider.currentLocation() ?? .fallback
+        uvPeakWindow = try? await uvProvider.uvPeakWindow(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            date: date
+        )
+    }
+
     // MARK: - Mood
-    private func updateDailyMood() {
+    private func updateSelectedDateMood() {
         if let score = selectedDailySummary?.score {
-            mood = .from(score: score)
+            selectedDateMood = .from(score: score)
         } else {
-            mood = .from(uvIndex: uvIndex)
+            selectedDateMood = .neutral
         }
     }
 

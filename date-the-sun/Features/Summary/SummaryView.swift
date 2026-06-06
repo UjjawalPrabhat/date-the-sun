@@ -43,8 +43,8 @@ struct SummaryView: View {
 
     @ViewBuilder
     private var dailyContent: some View {
-        HeroCharacterCard(headline: viewModel.headline, mood: viewModel.mood)
-        SunExposureCard(indoorOutdoorObservations: viewModel.selectedObservations)
+        HeroCharacterCard(headline: viewModel.selectedDateHeadline, mood: viewModel.selectedDateMood)
+        SunExposureCard(indoorOutdoorObservations: viewModel.selectedObservations, uvPeakWindow: viewModel.uvPeakWindow)
         ProtectionLogCard(items: viewModel.protectionItems) { viewModel.toggleProtection($0) }
     }
 
