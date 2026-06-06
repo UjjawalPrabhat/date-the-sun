@@ -46,18 +46,11 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         Logger.location.info("Started location update")
         manager.requestAlwaysAuthorization()
         manager.allowsBackgroundLocationUpdates = true
-        
-        if locationPrecise {
-            manager.startUpdatingLocation()
-        } else {
-            //  manager.startUpdatingLocation()
-            /// Coarse background tracking — fires every ~500m or cell tower change
-            manager.startMonitoringSignificantLocationChanges()
-        }
+        manager.startUpdatingLocation()
     }
-    
+
     func stop() {
-        manager.stopMonitoringSignificantLocationChanges()
+        manager.stopUpdatingLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -84,10 +77,16 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
 actor LocationProcessor {
     private var debounceTask: Task<Void, Never>?
     
-        private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
-//    private let debounceInterval: Duration = .seconds(10) // 2 min still = user is static
+    private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
+    //    private let debounceInterval: Duration = .seconds(10) // 2 min still = user is static
     
     func handleLocationUpdate(_ location: CLLocation) {
+        /// Discard stale cached locations iOS delivers immediately on startup
+        guard location.timestamp > Date.now.addingTimeInterval(-30) else {
+            Logger.location.info("Skipping stale location (age: \(Date.now.timeIntervalSince(location.timestamp))s)")
+            return
+        }
+
         /// Insert for Location
         let entry = LocationEntry(
             latitude: location.coordinate.latitude,
