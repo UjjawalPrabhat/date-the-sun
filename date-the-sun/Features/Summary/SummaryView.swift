@@ -37,7 +37,7 @@ struct SummaryView: View {
     @ViewBuilder
     private var weeklyContent: some View {
 //        HeroCharacterCard(headline: model.weekly.headline, mood: model.weekly.mood)
-//        WeeklyExposureChart(days: model.weekly.days)
+        WeeklyExposureChart(days: viewModel.dailySummaries)
 //        ProtectionWeekGrid(rows: model.weekly.protection)
     }
 }

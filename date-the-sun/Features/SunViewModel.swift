@@ -16,7 +16,18 @@ final class SunViewModel {
     var message: String { mood.line }
     
     
-    
+    /// For Summary Screen
+    private(set) var dailySummaries: [DailySunSummary] = []
+    func fetchWeeklySummaries() throws {
+        let today = Calendar.current.startOfDay(for: .now)
+        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: today)!
+
+        let descriptor = FetchDescriptor<DailySunSummary>(
+            predicate: #Predicate { $0.date >= sevenDaysAgo && $0.date < today },
+            sortBy: [SortDescriptor(\.date, order: .forward)]
+        )
+        dailySummaries = try modelContext.fetch(descriptor)
+    }
     
     
     
@@ -75,6 +86,10 @@ final class SunViewModel {
         //            predicate: #Predicate { $0.date >= yesterday && $0.date < today }
         //        )
         //        todaySummary = try? modelContext.fetch(summaryDescriptor).first
+        
+        
+        /// Then fetch for summary
+        try? fetchWeeklySummaries()
         
         withAnimation(.easeInOut(duration: 0.35)) { updateMood() }
     }

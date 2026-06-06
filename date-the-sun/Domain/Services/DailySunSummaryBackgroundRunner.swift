@@ -11,17 +11,6 @@ import OSLog
 
 struct DailySummaryBackgroundRunner {
     
-    static func schedule() {
-        Logger.app.debug("Scheduling Daily Summary task")
-        let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.daily-summary")
-        request.earliestBeginDate = Calendar.current.nextDate(
-            after: .now,
-            matching: DateComponents(hour: 3, minute: 30), // 3.30 after HMM
-            matchingPolicy: .nextTime
-        )
-        try? BGTaskScheduler.shared.submit(request)
-    }
-    
     static func run(modelContainer: ModelContainer, protection: ProtectionProfile) async {
         let context = ModelContext(modelContainer)
         
@@ -43,7 +32,6 @@ struct DailySummaryBackgroundRunner {
         guard let observations = try? context.fetch(descriptor),
               !observations.isEmpty else {
             Logger.app.info("No processed observations for yesterday, skipping summary")
-            schedule()
             return
         }
         
@@ -53,7 +41,6 @@ struct DailySummaryBackgroundRunner {
         )
         if let existing = try? context.fetch(summaryDescriptor).first {
             Logger.app.info("Summary already exists for yesterday, skipping")
-            schedule()
             return
         }
         
@@ -106,6 +93,6 @@ struct DailySummaryBackgroundRunner {
             Logger.app.error("Daily summary save error: \(error)")
         }
         
-        schedule()
+        date_the_sunApp.scheduleDailySummary()
     }
 }

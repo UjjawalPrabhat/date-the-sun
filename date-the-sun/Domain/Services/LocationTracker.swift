@@ -42,9 +42,6 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         //  manager.startUpdatingLocation()
         /// Coarse background tracking — fires every ~500m or cell tower change
         manager.startMonitoringSignificantLocationChanges()
-        
-        /// Schedule overnight Viterbi
-        HMMBackgroundRunner.schedule()
     }
     
     func stop() {

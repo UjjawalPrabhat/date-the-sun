@@ -12,17 +12,6 @@ import OSLog
 /// Props to Sonnet
 struct HMMBackgroundRunner {
     
-    static func schedule() {
-        Logger.app.debug("Scheduling HMM Viterbi task")
-        let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.hmm-viterbi")
-        request.earliestBeginDate = Calendar.current.nextDate(
-            after: .now,
-            matching: DateComponents(hour: 3),  // 3am
-            matchingPolicy: .nextTime
-        )
-        try? BGTaskScheduler.shared.submit(request)
-    }
-    
     static func run(modelContainer: ModelContainer) async {
         let context = ModelContext(modelContainer)
         
@@ -54,6 +43,6 @@ struct HMMBackgroundRunner {
         }
         
         // Reschedule for next night
-        schedule()
+        date_the_sunApp.scheduleHMMViterbi()
     }
 }
