@@ -41,4 +41,20 @@ enum BackgroundScheduler {
             Logger.background.error("Failed to schedule daily summary: \(error)")
         }
     }
+
+    @MainActor
+    static func scheduleDailySunSummaryInit() {
+        let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.daily-sun-summary-init")
+        request.earliestBeginDate = Calendar(identifier: .gregorian).nextDate(
+            after: .now,
+            matching: DateComponents(hour: 23),
+            matchingPolicy: .nextTime
+        )
+        do {
+            try BGTaskScheduler.shared.submit(request)
+            Logger.background.info("Daily sun summary init scheduled")
+        } catch {
+            Logger.background.error("Failed to schedule daily sun summary init: \(error)")
+        }
+    }
 }

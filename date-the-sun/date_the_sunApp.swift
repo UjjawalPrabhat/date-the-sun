@@ -54,6 +54,17 @@ struct date_the_sunApp: App {
                 task.setTaskCompleted(success: true)
             }
         }
+
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: "dev.heryan.date-the-sun.daily-sun-summary-init",
+            using: nil
+        ) { task in
+            Task {
+                await DailySunSummaryInitBackgroundRunner.run(modelContainer: container)
+                await MainActor.run { BackgroundScheduler.scheduleDailySunSummaryInit() }
+                task.setTaskCompleted(success: true)
+            }
+        }
     }
     
     @State private var locationTracker: LocationTracker?
@@ -66,6 +77,7 @@ struct date_the_sunApp: App {
                     locationTracker?.start()
                     BackgroundScheduler.scheduleHMMViterbi()
                     BackgroundScheduler.scheduleDailySummary()
+                    BackgroundScheduler.scheduleDailySunSummaryInit()
 #if DEBUG
                     preloadTestData(container: sharedModelContainer)
                     Task {

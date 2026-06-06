@@ -6,6 +6,7 @@
 	<array>
 		<string>dev.heryan.date-the-sun.hmm-viterbi</string>
 		<string>dev.heryan.date-the-sun.daily-summary</string>
+		<string>dev.heryan.date-the-sun.daily-sun-summary-init</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
