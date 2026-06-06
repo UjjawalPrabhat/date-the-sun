@@ -17,29 +17,54 @@ final class SunViewModel {
     
     
     /// For Summary Screen
+    /// Daily
+    private(set) var yesterdaySummary: [HMMObservation] = []
+    var selectedDate: Date = Calendar.current.date(byAdding: .day, value: -1, to: .now)! {
+        didSet { try? fetchObservations(for: selectedDate) }
+    }
+    var selectedDateLabel: String {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        let selected = calendar.startOfDay(for: selectedDate)
+        let days = calendar.dateComponents([.day], from: selected, to: today).day ?? 0
+
+        switch days {
+        case 1: return "Yesterday"
+        case 2: return "2 days ago"
+        case 3: return "3 days ago"
+        default: return selectedDate.formatted(.dateTime.day().month().year())
+        }
+    }
+    /// Weekly
     private(set) var dailySummaries: [DailySunSummary] = []
     func fetchWeeklySummaries() throws {
-        let today = Calendar.current.startOfDay(for: .now)
-        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: today)!
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: today)!
 
         let descriptor = FetchDescriptor<DailySunSummary>(
-            predicate: #Predicate { $0.date >= sevenDaysAgo && $0.date < today },
+            predicate: #Predicate { $0.date >= sevenDaysAgo && $0.date <= yesterday },
             sortBy: [SortDescriptor(\.date, order: .forward)]
         )
         dailySummaries = try modelContext.fetch(descriptor)
     }
-    
-    
+    var weekLabel: String {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+
+        let start = sevenDaysAgo.formatted(.dateTime.day().month())
+        let end = yesterday.formatted(.dateTime.day().month())
+        return "\(start) – \(end)"
+    }
     
     var selectedPeriod: SummaryPeriod = .daily
     
     private(set) var greeting: String
     private(set) var userName: String
     private(set) var todaySummary: DailySunSummary?      // nil until HMM has run
-    //    private(set) var protection: ProtectionProfile
-    
-    let dateText: String
-    let weekLabel: String
     
     private let uvProvider: UVIndexProviding
     private let locationProvider: LocationProviding
@@ -64,8 +89,7 @@ final class SunViewModel {
         //            wearingSunscreen: false,
         //            wearingProtectiveClothing: false
         //        )
-        self.dateText = now.formatted(.dateTime.day().month().year())
-        self.weekLabel = Self.weekLabel(for: now)
+        self.yesterdaySummary = []
     }
     
     func refresh() async {
@@ -87,7 +111,8 @@ final class SunViewModel {
         //        )
         //        todaySummary = try? modelContext.fetch(summaryDescriptor).first
         
-        
+        /// For yesterday observations
+        try? fetchObservations(for: selectedDate)
         /// Then fetch for summary
         try? fetchWeeklySummaries()
         
@@ -110,6 +135,18 @@ final class SunViewModel {
     
     private func updateMood() {
         mood = KiranMood.from(uvIndex: uvIndex)
+    }
+    
+    func fetchObservations(for date: Date) throws {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: date)
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+
+        let descriptor = FetchDescriptor<HMMObservation>(
+            predicate: #Predicate { $0.timestamp >= start && $0.timestamp < end },
+            sortBy: [SortDescriptor(\.timestamp, order: .forward)]
+        )
+        yesterdaySummary = try modelContext.fetch(descriptor)
     }
     
     private static func weekLabel(for date: Date) -> String {
