@@ -159,6 +159,19 @@ final class SunViewModel {
             date: selectedDate
         )
 
+        if let maxUV = try? await uvProvider.maxUVIndexToday(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        ) {
+            NotificationManager.scheduleMorningNotification(maxUvTodayForecast: maxUV)
+            if let peakWindow = uvPeakWindow {
+                NotificationManager.scheduleMidDayNotification(
+                    maxUvTodayForecast: maxUV,
+                    minuteOfDay: peakWindow.startMinute - 30
+                )
+            }
+        }
+
         try? fetchObservations(for: selectedDate)
         try? fetchDailySummary(for: selectedDate)
         try? fetchWeeklySummaries()

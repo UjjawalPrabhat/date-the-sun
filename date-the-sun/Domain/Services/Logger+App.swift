@@ -13,4 +13,5 @@ extension Logger {
     static let hmm        = Logger(subsystem: "dev.heryan.date-the-sun", category: "HMM")
     static let dailySummary = Logger(subsystem: "dev.heryan.date-the-sun", category: "DailySummary")
     static let background = Logger(subsystem: "dev.heryan.date-the-sun", category: "Background")
+    static let notification = Logger(subsystem: "dev.heryan.date-the-sun", category: "Notification")
 }

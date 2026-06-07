@@ -59,6 +59,31 @@ nonisolated struct RESTUVIndexProvider: UVIndexProviding {
         return (startMinute: minuteOfDay(first.forecastStart), endMinute: minuteOfDay(peakEnd))
     }
 
+    func maxUVIndexToday(latitude: Double, longitude: Double) async throws -> Int {
+        let tz = TimeZone.current.identifier
+        let token = try await TokenManager.shared.validToken()
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: .now)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        let formatter = ISO8601DateFormatter()
+        var components = URLComponents(
+            string: "https://weatherkit.apple.com/api/v1/weather/en/\(latitude)/\(longitude)"
+        )!
+        components.queryItems = [
+            .init(name: "dataSets", value: "forecastHourly"),
+            .init(name: "timezone", value: tz),
+            .init(name: "hourlyStart", value: formatter.string(from: startOfDay)),
+            .init(name: "hourlyEnd", value: formatter.string(from: endOfDay)),
+        ]
+        var request = URLRequest(url: components.url!)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(HourlyWeatherKitResponse.self, from: data)
+        return decoded.forecastHourly.hours.map { $0.uvIndex }.max() ?? 0
+    }
+
     private func minuteOfDay(_ date: Date) -> Double {
         let comps = Calendar.current.dateComponents([.hour, .minute], from: date)
         return Double((comps.hour ?? 0) * 60 + (comps.minute ?? 0))

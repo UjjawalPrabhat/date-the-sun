@@ -21,12 +21,14 @@ struct DebugSheetView: View {
         case observations = "Observations"
         case summaries    = "Summaries"
         case locations    = "Locations"
+        case seed         = "Seed"
 
         var icon: String {
             switch self {
             case .observations: return "eye"
             case .summaries:    return "sun.max"
             case .locations:    return "location"
+            case .seed:         return "square.and.arrow.down"
             }
         }
     }
@@ -79,6 +81,8 @@ struct DebugSheetView: View {
                     DailySummaryListView(modelContainer: modelContainer, search: searchText)
                 case .locations:
                     LocationEntryListView(modelContainer: modelContainer, search: searchText)
+                case .seed:
+                    GPXSeedView(modelContainer: modelContainer)
                 }
             }
             .navigationTitle("🛠 SwiftData Debug")

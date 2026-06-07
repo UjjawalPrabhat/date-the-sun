@@ -6,7 +6,7 @@ nonisolated enum KiranMood: String, CaseIterable {
     case happy      // balanced — warm pink corona, beaming
     case neutral    // a little too much / too little — orange corona
     case angry      // way too much or too little — fiery red corona, scowling
-
+    
     /// Name of the illustrated asset in the asset catalog (static fallback).
     var assetName: String {
         switch self {
@@ -15,7 +15,7 @@ nonisolated enum KiranMood: String, CaseIterable {
         case .angry:   "KiranAngry"
         }
     }
-
+    
     /// Name of the bundled Lottie animation (a `<name>.json` in the app bundle).
     /// Every mood is animated; the optional keeps the static `assetName` fallback
     /// available if the Lottie package is ever absent.
@@ -66,10 +66,10 @@ extension KiranMood {
     }
     
     static func from(score: Double) -> KiranMood {
-            switch score {
-            case 60...70:           return .happy
-            case 40..<60, 70..<80:  return .neutral
-            default:                return .angry
-            }
+        switch score {
+        case 60...70:           return .happy
+        case 40..<60, 70..<80:  return .neutral
+        default:                return .angry
         }
+    }
 }
