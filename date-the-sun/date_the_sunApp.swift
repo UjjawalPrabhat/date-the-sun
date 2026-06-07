@@ -54,7 +54,7 @@ struct date_the_sunApp: App {
             let work = Task {
                 await DailySummaryBackgroundRunner.run(
                     modelContainer: container,
-                    protection: .init(wearingSunscreen: true, wearingProtectiveClothing: true)
+                    protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false) // by default false first initiating
                 )
                 await MainActor.run { BackgroundScheduler.scheduleDailySummary() }
                 task.setTaskCompleted(success: true)

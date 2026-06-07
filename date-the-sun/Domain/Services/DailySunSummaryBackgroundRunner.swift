@@ -35,23 +35,27 @@ struct DailySummaryBackgroundRunner {
         let summaryDescriptor = FetchDescriptor<DailySunSummary>(
             predicate: #Predicate { $0.date >= targetDay && $0.date < nextDay }
         )
+        var effectiveProtection = protection
         if let existing = try? context.fetch(summaryDescriptor).first {
             if existing.observationCount > 0 {
                 Logger.dailySummary.info("Real summary already exists for \(targetDay), skipping")
                 return
             }
-            // Remove the init placeholder so the real summary can be inserted
+            effectiveProtection = ProtectionProfile(
+                wearingSunscreen: existing.wearSunscreen,
+                wearingProtectiveClothing: existing.wearProtectiveClothing
+            )
             context.delete(existing)
         }
-        
+
         Logger.dailySummary.info("Computing daily summary for \(targetDay)...")
-        let res = computeDailySummary(observations: observations, protection: protection)
-        
+        let res = computeDailySummary(observations: observations, protection: effectiveProtection)
+
         let summary = DailySunSummary(
             date: targetDay,
             score: res.score,
-            wearSunscreen: protection.wearingSunscreen,
-            wearProtectiveClothing: protection.wearingProtectiveClothing,
+            wearSunscreen: effectiveProtection.wearingSunscreen,
+            wearProtectiveClothing: effectiveProtection.wearingProtectiveClothing,
             totalOutdoorMinutes: res.totalOutdoorMinutes,
             peakUVIndex: res.peakUVIndex,
             averageUVIndex: res.averageUVIndex,
