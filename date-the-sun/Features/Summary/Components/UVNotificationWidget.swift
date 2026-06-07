@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct UVNotificationWidget: View {
-    
     var onLazyTap: () -> Void
     var onDoneTap: () -> Void
     var value: Int

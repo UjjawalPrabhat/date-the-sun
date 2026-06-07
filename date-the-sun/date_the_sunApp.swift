@@ -6,6 +6,8 @@ import OSLog
 
 @main
 struct date_the_sunApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             LocationEntry.self,

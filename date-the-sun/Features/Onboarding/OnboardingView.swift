@@ -10,7 +10,7 @@ struct OnboardingView: View {
     // 1. Track the current page
     @State private var currentPage = 0
     @State private var isShowingMainView = false
-        
+    
     // Connect to the same AppStorage key here
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     
@@ -64,7 +64,10 @@ struct OnboardingView: View {
                     // Dynamic Button based on the specific page requirements
                     if currentPage == 0 {
                         // 1. Skip button ONLY for page 0
-                        Button(action: { hasCompletedOnboarding = true }) {
+                        Button(action: {
+                            NotificationManager.requestAuthorization() 
+                            hasCompletedOnboarding = true
+                        }) {
                             Text("Skip")
                                 .fontWeight(.medium)
                                 .foregroundColor(.black)
@@ -77,7 +80,10 @@ struct OnboardingView: View {
                         }
                     } else if currentPage == 2 {
                         // 2. Get Started button ONLY for page 2
-                        Button(action: { hasCompletedOnboarding = true }) {
+                        Button(action: {
+                            NotificationManager.requestAuthorization()
+                            hasCompletedOnboarding = true
+                        }) {
                             Text("Get Started")
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
