@@ -70,3 +70,10 @@ struct UVNotificationWidget: View {
         }
     }
 }
+
+#Preview {
+    UVNotificationWidget(
+        onLazyTap: {},
+        onDoneTap: {},
+        value: 8)
+}

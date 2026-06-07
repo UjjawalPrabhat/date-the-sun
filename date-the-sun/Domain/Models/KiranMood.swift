@@ -45,12 +45,41 @@ nonisolated enum KiranMood: String, CaseIterable {
         }
     }
     
+    /// A representative function to randomize dialogue list from the character brief.
+    static func generateStatusText(for mood: KiranMood) -> String {
+        switch mood {
+        case .happy: // Happy: Low (1-2) & Moderate (3-5)
+            let happyPhrases = [
+                "I'm feeling pretty chill today. Do you want to hang?",
+                "I am fine today, thank you. You're fine as well, to me.",
+                "You notice that I'm doing good today. I hope you do too!"
+            ]
+            return happyPhrases.randomElement() ?? "You're so understanding and attentive of me, I can't love you enough."
+            
+        case .neutral: // Neutral: High (6-7)
+            let neutralPhrases = [
+                "I don't know about today. I'm not feeling great.",
+                "If you ask me if I were okay, I can't say so."
+            ]
+            return neutralPhrases.randomElement() ?? "I wanna see you. Don't get yourself too busy that you'd forget about me."
+            
+        case .angry: // Toxic: Very High (8-10) & Extreme: (11+)
+            let extremePhrases = [
+                "Your obsession with me is getting out of hand! I need space, stay away",
+                "I'm so infuriated today, I might burn you if you're not careful with me.",
+                "I'm in a really bad mood, don't try to cross me!",
+                "Do you think I look okay to you?! I am far from okay!"
+            ]
+            return extremePhrases.randomElement() ?? "Your obsession with me is getting out of hand! I need space, stay away!"
+        }
+    }
+    
     /// A representative line of dialogue from the character brief.
     var line: String {
         switch self {
-        case .happy:   "You're so understanding and attentive of me, I can't love you enough."
-        case .neutral: "I wanna see you. Don't get yourself too busy that you'd forget about me."
-        case .angry:   "Your obsession with me is getting out of hand! I need space, stay away!"
+        case .happy:   KiranMood.generateStatusText(for: KiranMood.happy)
+        case .neutral: KiranMood.generateStatusText(for: KiranMood.neutral)
+        case .angry:   KiranMood.generateStatusText(for: KiranMood.angry)
         }
     }
 }
