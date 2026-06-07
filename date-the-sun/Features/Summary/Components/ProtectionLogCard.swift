@@ -7,7 +7,7 @@ struct ProtectionLogCard: View {
     var onToggle: (ProtectionItem) -> Void = { _ in }
 
     var body: some View {
-        SectionCard(title: "Protection Log", systemImage: "checkmark.shield.fill", background: Palette.pants) {
+        SectionCard(title: "Protection Log", systemImage: "checkmark.shield.fill", background: Palette.pants, info: .protectionLogDaily) {
             VStack(spacing: 12) {
                 ForEach(items) { item in
                     ProtectionRow(item: item) { onToggle(item) }

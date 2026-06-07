@@ -23,7 +23,7 @@ struct WeeklyExposureChart: View {
     }
     
     var body: some View {
-        SectionCard(title: "Sun Exposure", systemImage: "sun.max.fill", background: .shrek) {
+        SectionCard(title: "Sun Exposure", systemImage: "sun.max.fill", background: .shrek, info: .sunExposureWeekly) {
             VStack(spacing: 16) {
                 HStack(alignment: .bottom, spacing: 12) {
                     ForEach(days) { day in

@@ -5,7 +5,7 @@ struct ProtectionWeekGrid: View {
     let days: [DailySunSummary]
     
     var body: some View {
-        SectionCard(title: "Protection Log", systemImage: "checkmark.shield.fill", background: Palette.pants) {
+        SectionCard(title: "Protection Log", systemImage: "checkmark.shield.fill", background: Palette.pants, info: .protectionLogWeekly) {
             VStack(spacing: 12) {
                 habitRow(
                     title: "Sunscreen",
