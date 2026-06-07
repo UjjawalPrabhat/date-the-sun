@@ -164,6 +164,12 @@ final class SunViewModel {
             longitude: coordinate.longitude
         ) {
             NotificationManager.scheduleMorningNotification(maxUvTodayForecast: maxUV)
+            if let peakWindow = uvPeakWindow {
+                NotificationManager.scheduleMidDayNotification(
+                    maxUvTodayForecast: maxUV,
+                    minuteOfDay: peakWindow.startMinute - 30
+                )
+            }
         }
 
         try? fetchObservations(for: selectedDate)

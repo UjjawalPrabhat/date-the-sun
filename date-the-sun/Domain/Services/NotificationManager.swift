@@ -54,6 +54,30 @@ struct NotificationManager {
             }
         }
     }
+    
+    /// Schedule midday UV warning notification.
+    /// - Parameters:
+    ///   - maxUvTodayForecast: forecast max UV from WeatherKit
+    ///   - minuteOfDay: minutes-of-day (0–1440) when the notification fires — pass `peakStartMinute - 30`
+    static func scheduleMidDayNotification(maxUvTodayForecast: Int, minuteOfDay: Double) {
+        let totalMinutes = max(0, Int(minuteOfDay))
+        let content = UNMutableNotificationContent()
+        content.title = "New Message from Kiran"
+        content.body = NotificationCopy.from(uvIndex: maxUvTodayForecast).midDayBody
+        content.sound = .default
+        var dateComponents = DateComponents()
+        dateComponents.hour = totalMinutes / 60
+        dateComponents.minute = totalMinutes % 60
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(identifier: "midday-notification", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                Logger.notification.error("Failed to schedule midday notification: \(error)")
+            } else {
+                Logger.notification.info("Midday notification scheduled for \(totalMinutes / 60):\(String(format: "%02d", totalMinutes % 60)) daily")
+            }
+        }
+    }
 }
 
 enum NotificationCopy: String {
@@ -79,6 +103,16 @@ enum NotificationCopy: String {
             "Today’s gonna be hotter, you better cover yourself, okay? 🥵"
         case .high:
             "Today’s gonna be freaking hot because I’m bothered! 👹💥"
+        }
+    }
+    var midDayBody: String {
+        switch self {
+        case .low:
+            ""
+        case .mid:
+            Bool.random() ? "It’s getting hot, so you better put on some protection, you hear me?" : "PSA: it’s hot and you need to put on protection. Are you listening?"
+        case .high:
+            Bool.random() ? "WEAR SOME DAMN PROTECTION OR YOU’LL GET BURNED!" : "WHERE’S YOUR PROTECTION??"
         }
     }
 }
