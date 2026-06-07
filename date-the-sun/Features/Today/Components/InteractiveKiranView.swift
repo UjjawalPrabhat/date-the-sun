@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(Lottie)
+import Lottie
+#endif
 
 /// Kiran with life and interaction: a continuous idle float + sway, a tap that
 /// makes her bounce (and fires `onTap`), and a drag that lets you nudge her so
@@ -14,11 +17,9 @@ struct InteractiveKiranView: View {
     @State private var dragTilt: Double = 0
 
     var body: some View {
-        Image(mood.assetName)
-            .resizable()
+        character
             .id(mood)
             .transition(.opacity.combined(with: .scale(scale: 0.96)))
-            .scaledToFit()
             .scaleEffect(pressScale, anchor: .bottom)
             .rotationEffect(.degrees(idleSway + dragTilt), anchor: .bottom)
             .offset(x: dragOffset.width, y: idleFloat + dragOffset.height)
@@ -26,6 +27,32 @@ struct InteractiveKiranView: View {
             .gesture(dragGesture)
             .onTapGesture { tap() }
             .onAppear(perform: startIdleAnimation)
+    }
+
+    /// Kiran's body: a looping Lottie scene when one exists for this mood (she
+    /// blinks and sways on her own), otherwise the static illustration. Guarded
+    /// by `#if canImport(Lottie)` so the app still builds — static-only — before
+    /// the Lottie Swift package is added.
+    @ViewBuilder
+    private var character: some View {
+        #if canImport(Lottie)
+        if let name = mood.lottieName {
+            LottieView(animation: .named(name))
+                .looping()
+                .resizable()
+                .aspectRatio(1080.0 / 1920.0, contentMode: .fit) // match canvas + static image
+        } else {
+            staticCharacter
+        }
+        #else
+        staticCharacter
+        #endif
+    }
+
+    private var staticCharacter: some View {
+        Image(mood.assetName)
+            .resizable()
+            .scaledToFit()
     }
 
     private var dragGesture: some Gesture {

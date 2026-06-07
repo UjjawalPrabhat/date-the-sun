@@ -31,6 +31,10 @@ struct SectionCard<Content: View>: View {
                 .background(background)
         }
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(Palette.ink, lineWidth: 2)
+        )
         .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
     }
 }

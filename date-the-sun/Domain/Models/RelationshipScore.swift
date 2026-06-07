@@ -50,10 +50,9 @@ nonisolated struct RelationshipScore {
 
     private static func mood(for score: Double) -> KiranMood {
         switch score {
-        case 78...:   return .happy
-        case 58..<78: return .calm
-        case 33..<58: return .neutral
-        default:      return .toxic
+        case 58...:   return .happy   // balanced & protected (absorbs the old "calm" band)
+        case 33..<58: return .neutral // a little too much / too little
+        default:      return .angry   // way out of balance
         }
     }
 }

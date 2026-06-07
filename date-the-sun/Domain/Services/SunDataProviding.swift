@@ -37,7 +37,7 @@ nonisolated struct MockSunDataProvider: SunDataProviding {
 
         return WeeklySunSummary(
             weekLabel: "This Week",
-            mood: .calm,
+            mood: .happy,
             headline: "A well-balanced week — keep it up",
             days: days,
             protection: [
