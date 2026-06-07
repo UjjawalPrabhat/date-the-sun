@@ -17,6 +17,7 @@ struct KiranSplashScreen: View {
                 .symbolEffect(.pulse, options: .repeating)
                 .symbolEffect(.rotate, options: .repeating)
             Text("Seeing what Kiran is up to…")
+                .foregroundStyle(.vermillion)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
