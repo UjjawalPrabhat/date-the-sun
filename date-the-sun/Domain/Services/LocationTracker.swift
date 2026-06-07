@@ -31,6 +31,8 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
             /// 5m is sub-footstep indoors
             /// 50m is "entered new area"
         }
+        /// Prevent iOS from pausing updates when stationary
+        manager.pausesLocationUpdatesAutomatically = false
     }
     
     /// One time
@@ -47,10 +49,19 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
         manager.requestAlwaysAuthorization()
         manager.allowsBackgroundLocationUpdates = true
         manager.startUpdatingLocation()
+        /// Significant-location monitoring wakes the app from suspended state (~500m cell-tower accuracy).
+        /// Fires the same didUpdateLocations delegate and is the only way to receive updates after the
+        /// OS suspends the process.
+        manager.startMonitoringSignificantLocationChanges()
     }
-
+    
     func stop() {
         manager.stopUpdatingLocation()
+        manager.stopMonitoringSignificantLocationChanges()
+    }
+    
+    func recover() async {
+        await processor.recoverUnclassifiedObservations()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -76,17 +87,47 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
 @ModelActor
 actor LocationProcessor {
     private var debounceTask: Task<Void, Never>?
+    private var lastSavedTimestamp: Date?
+    private var lastSavedCoordinate: (lat: Double, lng: Double)?
     
     private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
     //    private let debounceInterval: Duration = .seconds(10) // 2 min still = user is static
     
+    /// Minimum seconds between saves; guards against dual-fire from startUpdatingLocation + startMonitoringSignificantLocationChanges
+    private let dedupWindow: TimeInterval = 10
+    
+    /// Handle location updates. The logic should be:
+    /// 1. When there is update location, this should be called then LocationEntry and HMMObservation is inserted.
+    /// 2. When user stay still in a location for several minutes, it shoul do image classification of the current location.
+    /// - Parameter location: Pushed location from delegate.
     func handleLocationUpdate(_ location: CLLocation) {
-        /// Discard stale cached locations iOS delivers immediately on startup
+        Logger.location.info("User's location update: LAT \(location.coordinate.latitude) LNG \(location.coordinate.longitude)")
+        
+        /// Discard cached locations iOS delivered immediately on startup
         guard location.timestamp > Date.now.addingTimeInterval(-30) else {
             Logger.location.info("Skipping stale location (age: \(Date.now.timeIntervalSince(location.timestamp))s)")
             return
         }
-
+        
+        /// Deduplicate: both startUpdatingLocation and startMonitoringSignificantLocationChanges
+        /// call didUpdateLocations, so the same location can arrive twice within seconds
+        if let last = lastSavedTimestamp, abs(location.timestamp.timeIntervalSince(last)) < dedupWindow {
+            Logger.location.info("Skipping duplicate location within dedup window")
+            return
+        }
+        
+        /// Skip if device is stationary and coordinates haven't changed
+        /// Check for ~20m from earth radius  ~0.0002º
+        if let lastCoord = lastSavedCoordinate,
+           abs(location.coordinate.latitude - lastCoord.lat) < 0.0002,
+           abs(location.coordinate.longitude - lastCoord.lng) < 0.0002 {
+            Logger.location.info("Skipping stationary duplicate location")
+            return
+        }
+        
+        lastSavedTimestamp = location.timestamp
+        lastSavedCoordinate = (location.coordinate.latitude, location.coordinate.longitude)
+        
         /// Insert for Location
         let entry = LocationEntry(
             latitude: location.coordinate.latitude,
@@ -120,13 +161,12 @@ actor LocationProcessor {
             } catch is CancellationError {
                 /// cancelled, new update
             } catch {
-                Logger.app.error("Classification error: \(error)")
+                Logger.location.error("Classification error: \(error)")
             }
         }
     }
     
     private func locationClassification(for entry: LocationEntry) async throws {
-        let uvProvider: UVIndexProviding
         // Run classfication
         async let appleResult = MapTileClassification.classify(
             lat: entry.latitude, lng: entry.longitude, isAppleMaps: true
@@ -168,7 +208,30 @@ actor LocationProcessor {
             existing.uvIndex = uv
         }
         
-        do { try modelContext.save() } catch { Logger.app.error("SwiftData save error: \(error)") }
+        do { try modelContext.save() } catch { Logger.location.error("SwiftData save error: \(error)") }
+    }
+    
+    /// Classifies any HMMObservations that were saved but never classified because the app was
+    /// suspended before their debounce timer fired. Called once on each app launch.
+    func recoverUnclassifiedObservations() async {
+        let cutoff = Date.now.addingTimeInterval(-120)
+        let descriptor = FetchDescriptor<HMMObservation>(
+            predicate: #Predicate { $0.isMeasured == false && $0.timestamp <= cutoff },
+            sortBy: [SortDescriptor(\.timestamp, order: .forward)]
+        )
+        guard let unclassified = try? modelContext.fetch(descriptor), !unclassified.isEmpty else { return }
+        Logger.location.info("Recovering \(unclassified.count) unclassified observation(s)")
+        
+        for obs in unclassified {
+            let ts = obs.timestamp
+            let lower = ts.addingTimeInterval(-1)
+            let upper = ts.addingTimeInterval(1)
+            let locDescriptor = FetchDescriptor<LocationEntry>(
+                predicate: #Predicate { $0.timestamp >= lower && $0.timestamp <= upper }
+            )
+            guard let entry = try? modelContext.fetch(locDescriptor).first else { continue }
+            try? await locationClassification(for: entry)
+        }
     }
     
     private func saveLocationEntry(_ entry: LocationEntry) {

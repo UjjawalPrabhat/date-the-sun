@@ -33,7 +33,7 @@ private struct DebugSheetModifier: ViewModifier {
                         tapCount += 1
                         resetTask?.cancel()
 
-                        if tapCount >= 5 {
+                        if tapCount >= 2 {
                             tapCount = 0
                             isPresented = true
                         } else {
