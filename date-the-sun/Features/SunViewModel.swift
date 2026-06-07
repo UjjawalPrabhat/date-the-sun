@@ -170,6 +170,7 @@ final class SunViewModel {
                     minuteOfDay: peakWindow.startMinute - 30
                 )
             }
+            NotificationManager.scheduleEveningNotification(maxUvTodayForecast: maxUV)
         }
 
         try? fetchObservations(for: selectedDate)

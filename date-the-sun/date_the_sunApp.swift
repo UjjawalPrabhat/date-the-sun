@@ -8,25 +8,8 @@ import OSLog
 struct date_the_sunApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            LocationEntry.self,
-            HMMObservation.self,
-            DailySunSummary.self,
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
-        )
-        do {
-            return try ModelContainer(
-                for: schema,
-                configurations: [modelConfiguration]
-            )
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    // Shared with the Notification Content Extension via App Group (see SharedStore).
+    var sharedModelContainer: ModelContainer { SharedStore.container }
     
     init() {
         AppFont.registerBundledFonts()

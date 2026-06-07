@@ -6,7 +6,7 @@ struct SunExposureCard: View {
     var uvPeakWindow: (startMinute: Double, endMinute: Double)? = nil
 
     var body: some View {
-        SectionCard(title: "Sun Exposure", systemImage: "sun.max.fill", background: .shrek) {
+        SectionCard(title: "Sun Exposure", systemImage: "sun.max.fill", background: .shrek, info: .sunExposureDaily) {
             VStack(spacing: 16) {
                 IndoorOutdoorClock(indoorOutdoorObservations: indoorOutdoorObservations, uvPeakWindow: uvPeakWindow)
                     .padding(.top, 20)
