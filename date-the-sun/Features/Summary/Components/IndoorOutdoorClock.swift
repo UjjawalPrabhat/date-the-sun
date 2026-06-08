@@ -130,6 +130,7 @@ private struct RingArc: Shape {
     }
 }
 
+#if DEBUG
 #Preview {
     IndoorOutdoorClock(
         indoorOutdoorObservations: PreviewData.observations,
@@ -138,3 +139,4 @@ private struct RingArc: Shape {
     .padding()
     .background(Color.shrek)
 }
+#endif

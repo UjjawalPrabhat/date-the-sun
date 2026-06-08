@@ -39,9 +39,10 @@ struct ExposureLegendItem: View {
     }
 }
 
+#if DEBUG
 #Preview {
     SunExposureCard(indoorOutdoorObservations: PreviewData.observations, uvPeakWindow: PreviewData.uvPeakWindow)
         .padding()
         .background(Palette.canvas)
 }
- 
+#endif

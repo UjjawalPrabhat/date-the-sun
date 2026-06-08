@@ -69,7 +69,9 @@ struct date_the_sunApp: App {
                     }
 #endif
                 }
+#if DEBUG
                 .debugSheet(modelContainer: sharedModelContainer)
+#endif
         }
         .modelContainer(sharedModelContainer)
     }
