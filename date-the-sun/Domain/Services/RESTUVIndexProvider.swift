@@ -92,23 +92,23 @@ nonisolated struct RESTUVIndexProvider: UVIndexProviding {
 
 // MARK: - Response Models
 
-private struct WeatherKitResponse: Decodable, Sendable {
+private nonisolated struct WeatherKitResponse: Decodable, Sendable {
     let currentWeather: CurrentWeather
 }
 
-private struct CurrentWeather: Decodable, Sendable {
+private nonisolated struct CurrentWeather: Decodable, Sendable {
     let uvIndex: Int
 }
 
-private struct HourlyWeatherKitResponse: Decodable, Sendable {
+private nonisolated struct HourlyWeatherKitResponse: Decodable, Sendable {
     let forecastHourly: HourlyForecast
 }
 
-private struct HourlyForecast: Decodable, Sendable {
+private nonisolated struct HourlyForecast: Decodable, Sendable {
     let hours: [HourlyWeather]
 }
 
-private struct HourlyWeather: Decodable, Sendable {
+private nonisolated struct HourlyWeather: Decodable, Sendable {
     let forecastStart: Date
     let uvIndex: Int
 }

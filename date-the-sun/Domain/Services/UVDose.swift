@@ -25,13 +25,13 @@ struct ProtectionProfile {
     }
 }
 
-/// Props to Sonnet
 enum UVDose {
     static func computeUVDose(
         observations: [HMMObservation]
     ) -> Double {
+        guard observations.count > 1 else { return 0 }
         var totalDose = 0.0
-        
+
         for i in 0..<(observations.count - 1) {
             let obs = observations[i]
             let next = observations[i + 1]

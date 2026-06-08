@@ -14,53 +14,34 @@ struct date_the_sunApp: App {
     init() {
         AppFont.registerBundledFonts()
         let container = sharedModelContainer
-        
-        BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "dev.heryan.date-the-sun.hmm-viterbi",
-            using: nil
-        ) { task in
-            let work = Task {
-                await HMMBackgroundRunner.run(modelContainer: container)
-                await MainActor.run { BackgroundScheduler.scheduleHMMViterbi() }
-                task.setTaskCompleted(success: true)
-            }
-            task.expirationHandler = {
-                work.cancel()
-                task.setTaskCompleted(success: false)
+
+        func register(_ identifier: String, work: @escaping () async -> Void) {
+            BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
+                let job = Task {
+                    await work()
+                    task.setTaskCompleted(success: true)
+                }
+                task.expirationHandler = {
+                    job.cancel()
+                    task.setTaskCompleted(success: false)
+                }
             }
         }
 
-        BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "dev.heryan.date-the-sun.daily-summary",
-            using: nil
-        ) { task in
-            let work = Task {
-                await DailySummaryBackgroundRunner.run(
-                    modelContainer: container,
-                    protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false) // by default false first initiating
-                )
-                await MainActor.run { BackgroundScheduler.scheduleDailySummary() }
-                task.setTaskCompleted(success: true)
-            }
-            task.expirationHandler = {
-                work.cancel()
-                task.setTaskCompleted(success: false)
-            }
+        register("dev.heryan.date-the-sun.hmm-viterbi") {
+            await HMMBackgroundRunner.run(modelContainer: container)
+            await MainActor.run { BackgroundScheduler.scheduleHMMViterbi() }
         }
-
-        BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: "dev.heryan.date-the-sun.daily-sun-summary-init",
-            using: nil
-        ) { task in
-            let work = Task {
-                await DailySunSummaryInitBackgroundRunner.run(modelContainer: container)
-                await MainActor.run { BackgroundScheduler.scheduleDailySunSummaryInit() }
-                task.setTaskCompleted(success: true)
-            }
-            task.expirationHandler = {
-                work.cancel()
-                task.setTaskCompleted(success: false)
-            }
+        register("dev.heryan.date-the-sun.daily-summary") {
+            await DailySummaryBackgroundRunner.run(
+                modelContainer: container,
+                protection: .init(wearingSunscreen: false, wearingProtectiveClothing: false)
+            )
+            await MainActor.run { BackgroundScheduler.scheduleDailySummary() }
+        }
+        register("dev.heryan.date-the-sun.daily-sun-summary-init") {
+            await DailySunSummaryInitBackgroundRunner.run(modelContainer: container)
+            await MainActor.run { BackgroundScheduler.scheduleDailySunSummaryInit() }
         }
     }
     
@@ -209,7 +190,6 @@ private func preloadTestData(container: ModelContainer) {
 
 #if DEBUG
 private func backfillTestSummaries(container: ModelContainer) async {
-    let context = ModelContext(container)
     let calendar = Calendar.current
     for offset in 1...7 {
         let date = calendar.date(byAdding: .day, value: -offset + 1, to: .now)!

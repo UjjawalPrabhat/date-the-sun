@@ -10,7 +10,7 @@ import OSLog
 import UIKit
 import SwiftData
 
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         // Make the evening reminder's action buttons available before any
@@ -23,10 +23,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         Logger.notification.info("User tapped notification: \(response.notification.request.identifier), action: \(response.actionIdentifier)")
 
         switch response.actionIdentifier {
-        case NotificationManager.Action.lazy:
-            applyEveningResponse(done: false)
-        case NotificationManager.Action.done:
-            applyEveningResponse(done: true)
+        case NotificationManager.Action.no:
+            // User didn't protect themselves — record both habits as not done.
+            logNoProtection()
+        case NotificationManager.Action.yes:
+            // User did protect themselves — open the app (the action is
+            // `.foreground`) and route to the protection log so they can record
+            // exactly what they wore.
+            NotificationRouter.shared.shouldShowProtectionLog = true
         default:
             break // plain tap / dismiss — nothing to record
         }
@@ -38,19 +42,20 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         completionHandler([.banner, .sound])
     }
 
-    /// Records the evening check-in answer into the App-Group-shared store.
+    /// Records "no protection used" for today into the App-Group-shared store.
     @MainActor
-    private func applyEveningResponse(done: Bool) {
+    private func logNoProtection() {
         let context = ModelContext(SharedStore.container)
-        let todays = try? context.fetch(
-            FetchDescriptor<DailySunSummary>()
-        ).first(where: { Calendar.current.isDateInToday($0.date) })
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: .now)
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+        var descriptor = FetchDescriptor<DailySunSummary>(
+            predicate: #Predicate { $0.date >= start && $0.date < end }
+        )
+        descriptor.fetchLimit = 1
+        let todays = try? context.fetch(descriptor).first
 
-        if done {
-            NotificationResponseManager.handleDoneTap(summary: todays, modelContext: context)
-        } else {
-            NotificationResponseManager.handleLazyTap(summary: todays, modelContext: context)
-        }
-        Logger.notification.info("Evening check-in recorded: \(done ? "done" : "lazy")")
+        NotificationResponseManager.handleNoProtectionTap(summary: todays, modelContext: context)
+        Logger.notification.info("Evening check-in recorded: no protection")
     }
 }

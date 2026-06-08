@@ -36,14 +36,10 @@ struct InteractiveKiranView: View {
     @ViewBuilder
     private var character: some View {
         #if canImport(Lottie)
-        if let name = mood.lottieName {
-            LottieView(animation: .named(name))
-                .looping()
-                .resizable()
-                .aspectRatio(1080.0 / 1920.0, contentMode: .fit) // match canvas + static image
-        } else {
-            staticCharacter
-        }
+        LottieView(animation: .named(mood.lottieName))
+            .looping()
+            .resizable()
+            .aspectRatio(1080.0 / 1920.0, contentMode: .fit) // match canvas + static image
         #else
         staticCharacter
         #endif

@@ -7,11 +7,13 @@
 
 import OSLog
 
+// Loggers are thread-safe, so they stay `nonisolated` and can be used from
+// background actors and tasks under the project's MainActor default isolation.
 extension Logger {
-    static let app        = Logger(subsystem: "dev.heryan.date-the-sun", category: "App")
-    static let location   = Logger(subsystem: "dev.heryan.date-the-sun", category: "Location")
-    static let hmm        = Logger(subsystem: "dev.heryan.date-the-sun", category: "HMM")
-    static let dailySummary = Logger(subsystem: "dev.heryan.date-the-sun", category: "DailySummary")
-    static let background = Logger(subsystem: "dev.heryan.date-the-sun", category: "Background")
-    static let notification = Logger(subsystem: "dev.heryan.date-the-sun", category: "Notification")
+    nonisolated static let app          = Logger(subsystem: "dev.heryan.date-the-sun", category: "App")
+    nonisolated static let location     = Logger(subsystem: "dev.heryan.date-the-sun", category: "Location")
+    nonisolated static let hmm          = Logger(subsystem: "dev.heryan.date-the-sun", category: "HMM")
+    nonisolated static let dailySummary = Logger(subsystem: "dev.heryan.date-the-sun", category: "DailySummary")
+    nonisolated static let background   = Logger(subsystem: "dev.heryan.date-the-sun", category: "Background")
+    nonisolated static let notification = Logger(subsystem: "dev.heryan.date-the-sun", category: "Notification")
 }

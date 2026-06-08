@@ -12,9 +12,9 @@ struct SunExposureCard: View {
                     .padding(.top, 20)
 
                 HStack(spacing: 16) {
-                    legendItem(color: .outdoor, label: "Outdoor Time")
-                    legendItem(color: .indoor, label: "Indoor Time")
-                    legendItem(color: .vermillion, label: "UV Index Peak")
+                    ExposureLegendItem(color: .outdoor, label: "Outdoor Time")
+                    ExposureLegendItem(color: .indoor, label: "Indoor Time")
+                    ExposureLegendItem(color: .vermillion, label: "UV Index Peak")
                 }
                 .font(AppFont.medium(12))
                 .foregroundStyle(Palette.ink)
@@ -22,8 +22,14 @@ struct SunExposureCard: View {
             .padding(16)
         }
     }
+}
 
-    private func legendItem(color: Color, label: String) -> some View {
+/// A coloured dot + label used in the daily and weekly Sun Exposure legends.
+struct ExposureLegendItem: View {
+    let color: Color
+    let label: String
+
+    var body: some View {
         HStack(spacing: 6) {
             Circle()
                 .foregroundStyle(color)

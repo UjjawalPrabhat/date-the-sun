@@ -58,8 +58,8 @@ private struct ProtectionRow: View {
 
 #Preview {
     ProtectionLogCard(items: [
-        .init(title: "Sunscreen", subtitle: "Apply when going outside", systemImage: "drop.fill", isCompleted: true),
-        .init(title: "Protective Clothing", subtitle: "Use hat and long-sleeved shirt", systemImage: "tshirt.fill", isCompleted: false),
+        .init(kind: .sunscreen, title: "Sunscreen", subtitle: "Apply when going outside", systemImage: "drop.fill", isCompleted: true),
+        .init(kind: .protectiveClothing, title: "Protective Clothing", subtitle: "Use hat and long-sleeved shirt", systemImage: "tshirt.fill", isCompleted: false),
     ])
     .padding()
     .background(Palette.canvas)

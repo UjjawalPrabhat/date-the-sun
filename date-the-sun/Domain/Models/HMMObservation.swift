@@ -53,7 +53,6 @@ class HMMObservation {
         self.outdoorPosterior = outdoorPosterior
     }
     
-    /// Props to Sonnet
     /// Good way to think about this is "I'm uncertain here, lean on your transition priors instead."
     static func fuseProviders(
         apple: (label: String, confidence: Double)?,

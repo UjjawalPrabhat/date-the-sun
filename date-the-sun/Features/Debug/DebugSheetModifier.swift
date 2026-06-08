@@ -9,7 +9,7 @@
 import SwiftUI
 import SwiftData
 
-/// Hidden debug trigger: tap the top-left corner 5 times within 2 seconds.
+/// Hidden debug trigger: tap the top-left corner twice within 2 seconds.
 /// The tap zone is 60×60pt — invisible, sits above all content via ZStack overlay.
 extension View {
     func debugSheet(modelContainer: ModelContainer) -> some View {
