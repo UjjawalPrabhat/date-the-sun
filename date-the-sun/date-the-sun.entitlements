@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.ujjawal.date-the-sun</string>
+		<string>group.com.example.date-the-sun</string>
 	</array>
 </dict>
 </plist>
