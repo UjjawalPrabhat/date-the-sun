@@ -4,10 +4,6 @@ import SwiftData
 /// The Today screen: greeting, UV index, and the full-body Sun mascot speaking
 /// through a bottom dialogue box, over a soft blue-glow background.
 struct TodayView: View {
-    //    @Query(sort: \LocationEntry.timestamp, order: .reverse)
-    //    private var entries: [LocationEntry]
-    //    var latestEntry: LocationEntry? { entries.first }
-    
     let model: SunViewModel
     
     var body: some View {
@@ -47,11 +43,3 @@ struct TodayView: View {
         }
     }
 }
-//
-//#Preview {
-//    TodayView(model: SunModel(
-//        uvProvider: StaticUVIndexProvider(),
-//        locationProvider: StaticLocationProvider(),
-//        daylightProvider: MockDaylightProvider()
-//    ))
-//}

@@ -9,41 +9,24 @@ import CoreLocation
 import SwiftData
 import OSLog
 
-let locationPrecise = false
-
 @Observable
 class LocationTracker: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private let processor: LocationProcessor
-    private var oneTimeContinuation: CheckedContinuation<CLLocation?, Never>?
-    
+
     init(modelContainer: ModelContainer) {
         self.processor = LocationProcessor(modelContainer: modelContainer)
         super.init()
         manager.delegate = self
-        if locationPrecise {
-            manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            manager.distanceFilter = 10     /// only fires when user moves 10 real meters; suppresses GPS noise when stationary
-        } else {
-            manager.desiredAccuracy = kCLLocationAccuracyHundredMeters  /// `kCLLocationAccuracyBest` drains battery
-            /// 100m is supposedly OK for indoor/outdoor transition happens at building scale
-            manager.distanceFilter = 50     /// minimum meters the user must move before didUpdateLocations fires again.
-            /// 5m is sub-footstep indoors
-            /// 50m is "entered new area"
-        }
-        /// Prevent iOS from pausing updates when stationary
+        // 100m accuracy is enough for building-scale indoor/outdoor transitions and
+        // avoids the battery drain of `kCLLocationAccuracyBest`. The 50m distance
+        // filter suppresses stationary GPS noise while still catching "new area".
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = 50
+        // Prevent iOS from pausing updates when stationary.
         manager.pausesLocationUpdatesAutomatically = false
     }
-    
-    /// One time
-    func requestOneTimeLocation() async -> CLLocation? {
-        await withCheckedContinuation { continuation in
-            oneTimeContinuation = continuation
-            manager.requestWhenInUseAuthorization()
-            manager.requestLocation()
-        }
-    }
-    
+
     func start() {
         Logger.location.info("Started location update")
         manager.requestAlwaysAuthorization()
@@ -66,14 +49,6 @@ class LocationTracker: NSObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        /// For one time location
-        if let continuation = oneTimeContinuation {
-            oneTimeContinuation = nil
-            continuation.resume(returning: location)
-            return
-        }
-        
-        /// For live location
         Task {
             await processor.handleLocationUpdate(location)
         }
@@ -91,8 +66,7 @@ actor LocationProcessor {
     private var lastSavedCoordinate: (lat: Double, lng: Double)?
     
     private let debounceInterval: Duration = .seconds(60 * 2) // 2 min still = user is static
-    //    private let debounceInterval: Duration = .seconds(10) // 2 min still = user is static
-    
+
     /// Minimum seconds between saves; guards against dual-fire from startUpdatingLocation + startMonitoringSignificantLocationChanges
     private let dedupWindow: TimeInterval = 10
     
@@ -174,7 +148,7 @@ actor LocationProcessor {
         async let googleResult = MapTileClassification.classify(
             lat: entry.latitude, lng: entry.longitude, isAppleMaps: false
         )
-        async let uvResult = UVIndexService.fetch(
+        async let uvResult = RESTUVIndexProvider().currentUVIndex(
             latitude: entry.latitude,
             longitude: entry.longitude
         )

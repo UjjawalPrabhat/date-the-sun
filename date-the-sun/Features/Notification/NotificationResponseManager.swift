@@ -1,39 +1,26 @@
 //
-//  NotificationHandler.swift
+//  NotificationResponseManager.swift
 //  date-the-sun
-//
-//  Created by I Gusti Ngurah Bagus Ferry Mahayudha on 07/06/26.
 //
 
 import Foundation
 import SwiftData
+import OSLog
 
-// MARK: - Notification Data Logic Manager
-
-class NotificationResponseManager {
-    static func handleLazyTap(summary: DailySunSummary?, modelContext: ModelContext) {
-        let targetSummary = summary ?? DailySunSummary(
-            date: Date(), score: 0.0, wearSunscreen: true, wearProtectiveClothing: true,
-            totalOutdoorMinutes: 0.0, peakUVIndex: 0, averageUVIndex: 0.0, observationCount: 0
-        )
+/// Applies the evening reminder's notification responses to the shared store.
+enum NotificationResponseManager {
+    /// Records that the user used no protection today: both habits unchecked.
+    static func handleNoProtectionTap(summary: DailySunSummary?, modelContext: ModelContext) {
+        let targetSummary = summary ?? DailySunSummary.empty(for: Date())
         if summary == nil { modelContext.insert(targetSummary) }
-        
+
         targetSummary.wearSunscreen = false
         targetSummary.wearProtectiveClothing = false
-        
-        try? modelContext.save()
-    }
-    
-    static func handleDoneTap(summary: DailySunSummary?, modelContext: ModelContext) {
-        let targetSummary = summary ?? DailySunSummary(
-            date: Date(), score: 0.0, wearSunscreen: false, wearProtectiveClothing: false,
-            totalOutdoorMinutes: 0.0, peakUVIndex: 0, averageUVIndex: 0.0, observationCount: 0
-        )
-        if summary == nil { modelContext.insert(targetSummary) }
-        
-        targetSummary.wearSunscreen = true
-        targetSummary.wearProtectiveClothing = true
-        
-        try? modelContext.save()
+
+        do {
+            try modelContext.save()
+        } catch {
+            Logger.notification.error("Failed to record no-protection response: \(error)")
+        }
     }
 }

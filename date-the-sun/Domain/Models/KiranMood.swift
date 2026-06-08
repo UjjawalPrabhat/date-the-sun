@@ -17,9 +17,7 @@ nonisolated enum KiranMood: String, CaseIterable {
     }
     
     /// Name of the bundled Lottie animation (a `<name>.json` in the app bundle).
-    /// Every mood is animated; the optional keeps the static `assetName` fallback
-    /// available if the Lottie package is ever absent.
-    var lottieName: String? {
+    var lottieName: String {
         switch self {
         case .happy:   "KiranHappy"
         case .neutral: "KiranNeutral"
@@ -45,42 +43,30 @@ nonisolated enum KiranMood: String, CaseIterable {
         }
     }
     
-    /// A representative function to randomize dialogue list from the character brief.
-    static func generateStatusText(for mood: KiranMood) -> String {
-        switch mood {
-        case .happy: // Happy: Low (1-2) & Moderate (3-5)
-            let happyPhrases = [
+    /// A random line of dialogue from the character brief for this mood.
+    var line: String {
+        let phrases: [String]
+        switch self {
+        case .happy:
+            phrases = [
                 "I'm feeling pretty chill today. Do you want to hang?",
                 "I am fine today, thank you. You're fine as well, to me.",
                 "You notice that I'm doing good today. I hope you do too!"
             ]
-            return happyPhrases.randomElement() ?? "You're so understanding and attentive of me, I can't love you enough."
-            
-        case .neutral: // Neutral: High (6-7)
-            let neutralPhrases = [
+        case .neutral:
+            phrases = [
                 "I don't know about today. I'm not feeling great.",
                 "If you ask me if I were okay, I can't say so."
             ]
-            return neutralPhrases.randomElement() ?? "I wanna see you. Don't get yourself too busy that you'd forget about me."
-            
-        case .angry: // Toxic: Very High (8-10) & Extreme: (11+)
-            let extremePhrases = [
+        case .angry:
+            phrases = [
                 "Your obsession with me is getting out of hand! I need space, stay away",
                 "I'm so infuriated today, I might burn you if you're not careful with me.",
                 "I'm in a really bad mood, don't try to cross me!",
                 "Do you think I look okay to you?! I am far from okay!"
             ]
-            return extremePhrases.randomElement() ?? "Your obsession with me is getting out of hand! I need space, stay away!"
         }
-    }
-    
-    /// A representative line of dialogue from the character brief.
-    var line: String {
-        switch self {
-        case .happy:   KiranMood.generateStatusText(for: KiranMood.happy)
-        case .neutral: KiranMood.generateStatusText(for: KiranMood.neutral)
-        case .angry:   KiranMood.generateStatusText(for: KiranMood.angry)
-        }
+        return phrases.randomElement() ?? ""
     }
 }
 

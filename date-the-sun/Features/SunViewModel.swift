@@ -10,8 +10,7 @@ final class SunViewModel {
     /// Kiran's mood for the Today screen — reflects live UV index only, never changed by browsing history.
     private(set) var mood: KiranMood = .neutral
     private(set) var uvIndex: Int
-    var headline: String { mood.headline }
-    var message: String  { mood.line }
+    var message: String { mood.line }
 
     // MARK: - Summary Screen: Daily
     private(set) var selectedDailySummary: DailySunSummary?
@@ -21,7 +20,6 @@ final class SunViewModel {
 
     private(set) var weeklyMood: KiranMood = .neutral
     var weeklyHeadline: String { weeklyMood.headline }
-    var weeklyMessage: String  { weeklyMood.line }
 
     var selectedDate: Date = Calendar.current.date(byAdding: .day, value: -1, to: .now)! {
         didSet {
@@ -55,12 +53,14 @@ final class SunViewModel {
     var protectionItems: [ProtectionItem] {
         [
             ProtectionItem(
+                kind: .sunscreen,
                 title: "Sunscreen",
                 subtitle: "Apply when going outside",
                 systemImage: "drop.fill",
                 isCompleted: selectedDailySummary?.wearSunscreen ?? false
             ),
             ProtectionItem(
+                kind: .protectiveClothing,
                 title: "Protective Clothing",
                 subtitle: "Use hat and long-sleeved shirt",
                 systemImage: "tshirt.fill",
@@ -69,15 +69,41 @@ final class SunViewModel {
         ]
     }
 
+    /// Prepares the protection log for today so the user can fill it in — used
+    /// when they tap "Yes" on the evening reminder. Selects today and ensures a
+    /// `DailySunSummary` exists to toggle against (the morning summary may not
+    /// have been generated yet).
+    func beginTodayProtectionLog() {
+        let today = Calendar.current.startOfDay(for: .now)
+        selectedDate = today // didSet fetches the summary for today
+
+        if selectedDailySummary == nil {
+            let summary = DailySunSummary.empty(for: today)
+            modelContext.insert(summary)
+            try? modelContext.save()
+            try? fetchDailySummary(for: today)
+        }
+    }
+
     func toggleProtection(_ item: ProtectionItem) {
-        guard let summary = selectedDailySummary else { return }
-        switch item.title {
-        case "Sunscreen":
-            summary.wearSunscreen.toggle()
-        case "Protective Clothing":
-            summary.wearProtectiveClothing.toggle()
-        default:
-            break
+        // Lazily create today's summary if it doesn't exist yet, so protection
+        // can be logged for today (e.g. from the evening reminder) before the
+        // morning summary is generated.
+        let summary: DailySunSummary
+        if let existing = selectedDailySummary {
+            summary = existing
+        } else if isSelectedDateToday {
+            let created = DailySunSummary.empty(for: Calendar.current.startOfDay(for: .now))
+            modelContext.insert(created)
+            selectedDailySummary = created
+            summary = created
+        } else {
+            return
+        }
+
+        switch item.kind {
+        case .sunscreen:          summary.wearSunscreen.toggle()
+        case .protectiveClothing: summary.wearProtectiveClothing.toggle()
         }
         try? modelContext.save()
         try? fetchDailySummary(for: selectedDate)
@@ -93,14 +119,6 @@ final class SunViewModel {
 
     /// All summaries keyed by startOfDay — passed to the calendar picker for mood indicators.
     private(set) var allSummaries: [Date: DailySunSummary] = [:]
-
-    /// Keyed by startOfDay for O(1) lookup in ProtectionWeekGrid.
-    var weeklyProtectionLogs: [Date: DailySunSummary] {
-        Dictionary(
-            dailySummaries.map { (Calendar.current.startOfDay(for: $0.date), $0) },
-            uniquingKeysWith: { _, latest in latest }
-        )
-    }
 
     /// Shows the 7-day window ending the day before selectedDate.
     var weekLabel: String {

@@ -8,6 +8,7 @@
 #if DEBUG
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 // MARK: - Root Debug Sheet
 
@@ -22,6 +23,7 @@ struct DebugSheetView: View {
         case summaries    = "Summaries"
         case locations    = "Locations"
         case seed         = "Seed"
+        case notif        = "Notif"
 
         var icon: String {
             switch self {
@@ -29,6 +31,7 @@ struct DebugSheetView: View {
             case .summaries:    return "sun.max"
             case .locations:    return "location"
             case .seed:         return "square.and.arrow.down"
+            case .notif:        return "bell.badge"
             }
         }
     }
@@ -83,6 +86,8 @@ struct DebugSheetView: View {
                     LocationEntryListView(modelContainer: modelContainer, search: searchText)
                 case .seed:
                     GPXSeedView(modelContainer: modelContainer)
+                case .notif:
+                    NotificationDebugView()
                 }
             }
             .navigationTitle("🛠 SwiftData Debug")
@@ -425,6 +430,46 @@ private struct LocationEntryDetailView: View {
         }
         .navigationTitle("Location Detail")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Notification Debug
+
+private struct NotificationDebugView: View {
+    @State private var status = ""
+
+    var body: some View {
+        List {
+            Section {
+                Button {
+                    NotificationManager.scheduleTestEveningNotification(seconds: 8)
+                    status = "Scheduled — background the app now, then long-press the banner in ~8s to see Yes / No."
+                } label: {
+                    Label("Fire evening reminder (8s)", systemImage: "bell.badge.fill")
+                }
+            } footer: {
+                Text("Sends the evening check-in with the Yes/No actions and custom UI. Send the app to the background within 8 seconds so the banner appears; pull down / long-press it to reveal the buttons.")
+            }
+
+            if !status.isEmpty {
+                Section {
+                    Text(status)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section {
+                Button(role: .destructive) {
+                    UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+                    status = "Cleared all pending & delivered notifications."
+                } label: {
+                    Label("Clear all notifications", systemImage: "trash")
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
     }
 }
 

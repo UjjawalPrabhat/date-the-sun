@@ -9,7 +9,6 @@ import BackgroundTasks
 import SwiftData
 import OSLog
 
-/// Props to Sonnet
 struct HMMBackgroundRunner {
     
     static func run(modelContainer: ModelContainer) async {

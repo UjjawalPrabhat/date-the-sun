@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// Props to sonnet
 struct HMMEngine {
     
     // MARK: - Model Parameters

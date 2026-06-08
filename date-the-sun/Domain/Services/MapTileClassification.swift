@@ -14,7 +14,7 @@ struct ClassificationResult {
     let confidence: Float
 }
 
-class MapTileClassification {
+enum MapTileClassification {
     // Loaded once and reused — each CoreML model can be 20-50 MB.
     private static let appleVNModel: VNCoreMLModel = {
         let ml = try! AMapsSatelliteClassifier400x400x20(configuration: .init()).model

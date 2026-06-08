@@ -9,31 +9,30 @@ import UserNotifications
 import OSLog
 
 struct NotificationManager {
-    /// Identifiers shared with the Notification Content Extension. The extension's
-    /// `Info.plist` declares `UNNotificationExtensionCategory = eveningReminder`,
-    /// so any notification sent with this category renders the custom UI.
+    /// Category that carries the evening reminder's Yes/No action buttons. The
+    /// notification uses the standard system UI (Kiran's app icon shows as the
+    /// thumbnail). The notification content extension is disabled — its
+    /// `Info.plist` declares a non-matching category — because its custom UI
+    /// rendered empty and a low-res image attachment tore when expanded.
     enum Category {
         static let eveningReminder = "eveningReminder"
     }
 
     /// Action identifiers for the evening reminder's buttons. Handled in
     /// `AppDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:)`.
+    ///
+    /// "Yes" launches the app and opens the protection log so the user can log
+    /// what they wore; "No" silently records that no protection was used.
     enum Action {
-        static let lazy = "UV_EVENING_LAZY"
-        static let done = "UV_EVENING_DONE"
+        static let yes = "UV_EVENING_YES"
+        static let no = "UV_EVENING_NO"
     }
-
-    /// Key under which the forecast UV value is stored in the notification's
-    /// `userInfo`, so the content extension can render the matching mood.
-    static let uvValueKey = "uvValue"
 
     static func requestAuthorization() {
         registerCategories()
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
             guard granted else { return }
             Logger.notification.info("Notification permission granted")
-//            scheduleNotification()
-//            scheduleMorningNotification(maxUvTodayForecast: 7)
         }
     }
 
@@ -41,30 +40,32 @@ struct NotificationManager {
     /// call more than once. Call early (app launch + authorization request) so
     /// the buttons are available whenever a notification arrives.
     static func registerCategories() {
-        let lazyAction = UNNotificationAction(
-            identifier: Action.lazy,
-            title: "lazy laa",
-            options: []
+        // "Yes" carries `.foreground` so tapping it launches the app, where
+        // `RootView` opens the protection log for the user to fill in.
+        let yesAction = UNNotificationAction(
+            identifier: Action.yes,
+            title: "Yes",
+            options: [.foreground]
         )
-        let doneAction = UNNotificationAction(
-            identifier: Action.done,
-            title: "done!",
+        // "No" runs in the background and just records that no protection was used.
+        let noAction = UNNotificationAction(
+            identifier: Action.no,
+            title: "No",
             options: []
         )
         let eveningCategory = UNNotificationCategory(
             identifier: Category.eveningReminder,
-            actions: [lazyAction, doneAction],
+            actions: [yesAction, noAction],
             intentIdentifiers: [],
             options: []
         )
         UNUserNotificationCenter.current().setNotificationCategories([eveningCategory])
     }
 
-    /// Schedule the evening check-in notification (default 8 PM). Uses the
-    /// `eveningReminder` category so iOS shows the custom content extension UI
-    /// with the "lazy laa" / "done!" action buttons.
+    /// Schedule the evening check-in notification (default 8 PM) with the
+    /// `eveningReminder` category, so iOS shows the "Yes" / "No" action buttons.
     /// - Parameters:
-    ///   - maxUvTodayForecast: forecast max UV from WeatherKit, drives the copy + mood.
+    ///   - maxUvTodayForecast: forecast max UV from WeatherKit, drives the copy.
     ///   - hourReminder: the hour this notification is delivered (24h clock).
     static func scheduleEveningNotification(maxUvTodayForecast: Int, hourReminder: Int = 20) {
         let content = UNMutableNotificationContent()
@@ -72,7 +73,6 @@ struct NotificationManager {
         content.body = NotificationCopy.from(uvIndex: maxUvTodayForecast).eveningBody
         content.sound = .default
         content.categoryIdentifier = Category.eveningReminder
-        content.userInfo = [uvValueKey: maxUvTodayForecast]
 
         var dateComponents = DateComponents()
         dateComponents.hour = hourReminder
@@ -88,28 +88,39 @@ struct NotificationManager {
         }
     }
     
-    static func scheduleNotification() {
-        Logger.notification.info("Notification scheduled")
-        
+#if DEBUG
+    /// Fires the evening reminder almost immediately (after `seconds`) so the
+    /// Yes/No actions can be tested without waiting until 8 PM. Background the app
+    /// within the delay, then long-press (or pull down) the banner to reveal them.
+    static func scheduleTestEveningNotification(maxUvTodayForecast: Int = 8, seconds: TimeInterval = 8) {
+        registerCategories()
         let content = UNMutableNotificationContent()
-        content.title = "Hello"
-        content.body = "Notification"
+        content.title = "Evening check-in from Kiran"
+        content.body = NotificationCopy.from(uvIndex: maxUvTodayForecast).eveningBody
         content.sound = .default
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request)
+        content.categoryIdentifier = Category.eveningReminder
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, seconds), repeats: false)
+        let request = UNNotificationRequest(identifier: "evening-notification-test", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                Logger.notification.error("Failed to schedule test notification: \(error)")
+            } else {
+                Logger.notification.info("Test evening notification scheduled in \(seconds)s")
+            }
+        }
     }
-    
-    /// Schedule notification for Morning
+#endif
+
+    /// Schedule the morning notification.
     /// - Parameters:
     ///   - maxUvTodayForecast: forecast from WeatherKit
     ///   - hourReminder: the hour this notification will be delivered
     static func scheduleMorningNotification(maxUvTodayForecast: Int, hourReminder: Int = 7) {
+        let copy = NotificationCopy.from(uvIndex: maxUvTodayForecast)
         let content = UNMutableNotificationContent()
-        content.title = NotificationCopy.from(uvIndex: maxUvTodayForecast).morningTitle
-        content.body = NotificationCopy.from(uvIndex: maxUvTodayForecast).morningBody
+        content.title = copy.morningTitle
+        content.body = copy.morningBody
         content.sound = .default
         var dateComponents = DateComponents()
         dateComponents.hour = hourReminder

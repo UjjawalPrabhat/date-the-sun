@@ -9,52 +9,33 @@ import BackgroundTasks
 import OSLog
 
 enum BackgroundScheduler {
-    /// Schedule for running HMM Viterbi algorithm to determine true user's
-    /// indoor/outdoor time
+    /// Runs the HMM Viterbi pass that determines the user's true indoor/outdoor time.
     @MainActor
     static func scheduleHMMViterbi() {
-        let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.hmm-viterbi")
-        request.earliestBeginDate = Calendar(identifier: .gregorian).nextDate(
-            after: .now,
-            matching: DateComponents(hour: 3),
-            matchingPolicy: .nextTime
-        )
-        do {
-            try BGTaskScheduler.shared.submit(request)
-            Logger.background.info("HMM Viterbi scheduled")
-        } catch {
-            Logger.background.error("Failed to schedule HMM Viterbi: \(error)")
-        }
+        schedule("dev.heryan.date-the-sun.hmm-viterbi", at: DateComponents(hour: 3), label: "HMM Viterbi")
     }
+
     @MainActor
     static func scheduleDailySummary() {
-        let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.daily-summary")
-        request.earliestBeginDate = Calendar(identifier: .gregorian).nextDate(
-            after: .now,
-            matching: DateComponents(hour: 4, minute: 30),
-            matchingPolicy: .nextTime
-        )
-        do {
-            try BGTaskScheduler.shared.submit(request)
-            Logger.background.info("Daily summary scheduled")
-        } catch {
-            Logger.background.error("Failed to schedule daily summary: \(error)")
-        }
+        schedule("dev.heryan.date-the-sun.daily-summary", at: DateComponents(hour: 4, minute: 30), label: "Daily summary")
     }
 
     @MainActor
     static func scheduleDailySunSummaryInit() {
-        let request = BGAppRefreshTaskRequest(identifier: "dev.heryan.date-the-sun.daily-sun-summary-init")
+        schedule("dev.heryan.date-the-sun.daily-sun-summary-init", at: DateComponents(hour: 23), label: "Daily sun summary init")
+    }
+
+    @MainActor
+    private static func schedule(_ identifier: String, at time: DateComponents, label: String) {
+        let request = BGAppRefreshTaskRequest(identifier: identifier)
         request.earliestBeginDate = Calendar(identifier: .gregorian).nextDate(
-            after: .now,
-            matching: DateComponents(hour: 23),
-            matchingPolicy: .nextTime
+            after: .now, matching: time, matchingPolicy: .nextTime
         )
         do {
             try BGTaskScheduler.shared.submit(request)
-            Logger.background.info("Daily sun summary init scheduled")
+            Logger.background.info("\(label) scheduled")
         } catch {
-            Logger.background.error("Failed to schedule daily sun summary init: \(error)")
+            Logger.background.error("Failed to schedule \(label): \(error)")
         }
     }
 }

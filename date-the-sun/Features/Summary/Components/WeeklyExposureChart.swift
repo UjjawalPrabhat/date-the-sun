@@ -35,8 +35,8 @@ struct WeeklyExposureChart: View {
                 .padding(.bottom, 20)
                 
                 HStack(spacing: 16) {
-                    legendItem(color: .outdoor, label: "Outdoor Time")
-                    legendItem(color: .indoor,  label: "Indoor Time")
+                    ExposureLegendItem(color: .outdoor, label: "Outdoor Time")
+                    ExposureLegendItem(color: .indoor,  label: "Indoor Time")
                 }
                 .font(AppFont.medium(12))
                 .foregroundStyle(Palette.ink)
@@ -66,15 +66,6 @@ struct WeeklyExposureChart: View {
                     .foregroundStyle(Palette.ink)
                     .padding(.top, 6)
             }
-        }
-    }
-    
-    private func legendItem(color: Color, label: String) -> some View {
-        HStack(spacing: 6) {
-            Circle()
-                .foregroundStyle(color)
-                .frame(width: 10, height: 10)
-            Text(label)
         }
     }
 }

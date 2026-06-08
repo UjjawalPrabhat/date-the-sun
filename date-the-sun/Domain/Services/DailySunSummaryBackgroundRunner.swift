@@ -59,7 +59,7 @@ struct DailySummaryBackgroundRunner {
             totalOutdoorMinutes: res.totalOutdoorMinutes,
             peakUVIndex: res.peakUVIndex,
             averageUVIndex: res.averageUVIndex,
-            observationCount: observations.count,
+            observationCount: observations.count
         )
         context.insert(summary)
         
@@ -71,8 +71,7 @@ struct DailySummaryBackgroundRunner {
         }
     }
     
-    /// Compute daily summary
-    static func computeDailySummary(observations: [HMMObservation], protection: ProtectionProfile) ->  ComputedDailySummary {
+    static func computeDailySummary(observations: [HMMObservation], protection: ProtectionProfile) -> ComputedDailySummary {
         Logger.dailySummary.info("Computing daily summary on \(observations.count) observations with protection: \(protection.wearingSunscreen) \(protection.wearingProtectiveClothing)")
         let score = UVDose.dailyKiranScore(observations: observations, protection: protection)
         Logger.dailySummary.info("Calculated score: \(score)")
