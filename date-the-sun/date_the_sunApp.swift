@@ -72,7 +72,7 @@ struct date_the_sunApp: App {
                 .onAppear {
                     locationTracker = LocationTracker(modelContainer: sharedModelContainer)
                     locationTracker?.start()
-                    Task { await locationTracker?.recover() }
+//                    Task { await locationTracker?.recover() }
                     BackgroundScheduler.scheduleHMMViterbi()
                     BackgroundScheduler.scheduleDailySummary()
                     BackgroundScheduler.scheduleDailySunSummaryInit()
