@@ -6,9 +6,13 @@ struct SectionCard<Content: View>: View {
     let title: String
     let systemImage: String
     var background: Color
+    /// Optional explanatory copy. When provided, the header's "?" button becomes
+    /// tappable and presents an info sheet.
+    var info: WidgetInfo? = nil
     @ViewBuilder var content: () -> Content
 
     private let cornerRadius: CGFloat = 22
+    @State private var showInfo = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -17,8 +21,16 @@ struct SectionCard<Content: View>: View {
                 Text(title)
                     .font(AppFont.semibold(17))
                 Spacer()
-                Image(systemName: "questionmark.circle.fill")
-                    .foregroundStyle(.white.opacity(0.85))
+                if info != nil {
+                    Button {
+                        showInfo = true
+                    } label: {
+                        Image(systemName: "questionmark.circle.fill")
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("About \(title)")
+                }
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 18)
@@ -36,6 +48,11 @@ struct SectionCard<Content: View>: View {
                 .stroke(Palette.ink, lineWidth: 2)
         )
         .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+        .sheet(isPresented: $showInfo) {
+            if let info {
+                WidgetInfoSheet(info: info)
+            }
+        }
     }
 }
 
