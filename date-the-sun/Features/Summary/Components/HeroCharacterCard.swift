@@ -21,6 +21,10 @@ struct HeroCharacterCard: View {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(Palette.heroSky)
                         .frame(height: cardHeight)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                                .stroke(Palette.ink, lineWidth: 2)
+                        )
                         .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
 
                     Text(headline)

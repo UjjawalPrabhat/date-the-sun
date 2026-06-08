@@ -8,10 +8,10 @@
 		<dict>
 			<key>UNNotificationExtensionCategory</key>
 			<string>eveningReminder</string>
-			<key>UNNotificationExtensionInitialContentSizeRatio</key>
-			<real>0.6</real>
 			<key>UNNotificationExtensionDefaultContentHidden</key>
 			<true/>
+			<key>UNNotificationExtensionInitialContentSizeRatio</key>
+			<real>0.59999999999999998</real>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.usernotifications.content-extension</string>

@@ -85,13 +85,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DA1000000000000000000007 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -146,7 +139,6 @@
 			buildConfigurationList = DA1000000000000000000003 /* Build configuration list for PBXNativeTarget "UVNotificationExtension" */;
 			buildPhases = (
 				DA1000000000000000000006 /* Sources */,
-				DA1000000000000000000007 /* Frameworks */,
 				DA1000000000000000000008 /* Resources */,
 			);
 			buildRules = (
@@ -164,14 +156,6 @@
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
-
-/* Begin PBXTargetDependency section */
-		DA100000000000000000000B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DA1000000000000000000001 /* UVNotificationExtension */;
-			targetProxy = DA100000000000000000000C /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		B63E0C4D2FC7D2DA00532276 /* Project object */ = {
@@ -245,6 +229,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DA100000000000000000000B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DA1000000000000000000001 /* UVNotificationExtension */;
+			targetProxy = DA100000000000000000000C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B63E0C602FC7D2DB00532276 /* Debug */ = {
@@ -375,7 +367,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3MPN58B7KF;
+				DEVELOPMENT_TEAM = 9VBW89A4U3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "date-the-sun/Info.plist";
@@ -393,7 +385,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ujjawal.date-the-sun";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.heryan.date-the-sun";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -419,7 +411,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3MPN58B7KF;
+				DEVELOPMENT_TEAM = 9VBW89A4U3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "date-the-sun/Info.plist";
@@ -437,7 +429,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ujjawal.date-the-sun";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.heryan.date-the-sun";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -457,13 +449,13 @@
 		DA1000000000000000000004 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "UVNotificationExtension/UVNotificationExtension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = UVNotificationExtension/UVNotificationExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3MPN58B7KF;
+				DEVELOPMENT_TEAM = 9VBW89A4U3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "UVNotificationExtension/Info.plist";
+				INFOPLIST_FILE = UVNotificationExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "UV Reminder";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -473,7 +465,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ujjawal.date-the-sun.UVNotificationExtension";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.heryan.date-the-sun.UVNotificationExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -489,13 +481,13 @@
 		DA1000000000000000000005 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "UVNotificationExtension/UVNotificationExtension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = UVNotificationExtension/UVNotificationExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3MPN58B7KF;
+				DEVELOPMENT_TEAM = 9VBW89A4U3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "UVNotificationExtension/Info.plist";
+				INFOPLIST_FILE = UVNotificationExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "UV Reminder";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -505,7 +497,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ujjawal.date-the-sun.UVNotificationExtension";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.heryan.date-the-sun.UVNotificationExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

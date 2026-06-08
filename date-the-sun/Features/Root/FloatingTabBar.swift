@@ -10,6 +10,13 @@ enum AppTab: Hashable, CaseIterable {
         case .summary: "newspaper.fill"
         }
     }
+
+    var title: String {
+        switch self {
+        case .today:   "Today"
+        case .summary: "Summary"
+        }
+    }
 }
 
 /// The custom dark pill tab bar floating at the bottom of the screen.
@@ -38,17 +45,21 @@ struct FloatingTabBar: View {
                 selection = tab
             }
         } label: {
-            Image(systemName: tab.systemImage)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(isSelected ? Palette.ink : Palette.barIcon)
-                .frame(width: isSelected ? 78 : 56, height: 44)
-                .background {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(Palette.shirt)
-                            .matchedGeometryEffect(id: "tabHighlight", in: namespace)
-                    }
+            VStack(spacing: 3) {
+                Image(systemName: tab.systemImage)
+                    .font(.system(size: 18, weight: .semibold))
+                Text(tab.title)
+                    .font(AppFont.semibold(11))
+            }
+            .foregroundStyle(isSelected ? Palette.ink : Palette.barIcon)
+            .frame(width: 80, height: 48)
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Palette.shirt)
+                        .matchedGeometryEffect(id: "tabHighlight", in: namespace)
                 }
+            }
         }
         .buttonStyle(.plain)
     }
