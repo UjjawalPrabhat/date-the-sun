@@ -11,7 +11,6 @@ struct HeroCharacterCard: View {
     private let cardHeight: CGFloat = 360
     private let topOverflow: CGFloat = 48
     private let cornerRadius: CGFloat = 26
-    private let figureAspect: CGFloat = 1253.0 / 3264.0
 
     var body: some View {
         Color.clear
@@ -39,24 +38,28 @@ struct HeroCharacterCard: View {
                         .padding(.top, 28)
                         .padding(.leading, 24)
 
-                    GeometryReader { geo in
-                        let w = geo.size.width
-                        Image(mood.assetName)
-                            .resizable()
-                            .aspectRatio(figureAspect, contentMode: .fit)
-                            .frame(width: w * 0.66)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                            .offset(x: w * 0.19, y: 6)
-                            .id(mood)
-                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
-                    }
-                    .frame(height: cardHeight + topOverflow)
-                    .clipShape(
-                        UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
-                    )
+                    Image(summaryAsset(for: mood))
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                        .id(mood)
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        .frame(height: cardHeight + topOverflow)
+                        .clipShape(
+                            UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
+                        )
                 }
                 .frame(height: cardHeight + topOverflow)
             }
+    }
+
+    /// Summary-specific Kiran artwork per mood (the SummaryKiran* imagesets).
+    private func summaryAsset(for mood: KiranMood) -> String {
+        switch mood {
+        case .happy:   "SummaryKiranHappy"
+        case .neutral: "SummaryKiranNeutral"
+        case .angry:   "SummaryKiranAngry"
+        }
     }
 }
 
