@@ -21,21 +21,24 @@ struct OnboardingView: View {
                 OnboardingPageView(
                     title: "Meet Kiran",
                     description: "Kiran is your partner. Their mood will show how much—or less—sun exposure you need.",
-                    gradientColor: Color.blue.opacity(0.3)
+                    gradientColor: Color.blue.opacity(0.3),
+                    imageName: "KiranOnBoard1"
                 )
                 .tag(0)
 
                 OnboardingPageView(
                     title: "Keep it balanced",
                     description: "If Kiran's happy, that means you're balanced in your sun exposure. Less or more exposure will affect their emotions to you.",
-                    gradientColor: Color.orange.opacity(0.4)
+                    gradientColor: Color.orange.opacity(0.4),
+                    imageName: "KiranOnBoard2"
                 )
                 .tag(1)
 
                 OnboardingPageView(
                     title: "Track your progress",
                     description: "Details on your sun exposure and protection log can be accessed daily or weekly, along with Kiran's moods.",
-                    gradientColor: Color.pink.opacity(0.3)
+                    gradientColor: Color.pink.opacity(0.3),
+                    imageName: "KiranOnBoard3"
                 )
                 .tag(2)
             }

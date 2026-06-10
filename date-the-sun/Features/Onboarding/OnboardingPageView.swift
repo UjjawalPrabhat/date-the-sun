@@ -4,6 +4,7 @@ struct OnboardingPageView: View {
     let title: String
     let description: String
     let gradientColor: Color
+    let imageName: String
 
     var body: some View {
         ZStack {
@@ -18,6 +19,12 @@ struct OnboardingPageView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Spacer()
                 
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 300)
+                    .frame(maxWidth: .infinity)
+
                 Text(title)
                     .font(AppFont.semibold(32))
                     .foregroundColor(.black)
@@ -41,6 +48,7 @@ struct OnboardingPageView: View {
     OnboardingPageView(
         title: "Meet Kiran",
         description: "Kiran is your partner. Their mood will show how much—or less—sun exposure you need.",
-        gradientColor: Color.blue.opacity(0.3)
+        gradientColor: Color.blue.opacity(0.3),
+        imageName: "KiranOnBoard1"
     )
 }
